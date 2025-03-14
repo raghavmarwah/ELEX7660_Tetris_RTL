@@ -22,6 +22,10 @@ output_files/
 .vscode/
 .qsys_edit/
 
+# ignore Eclipse generated folders
+.metadata/
+RemoteSystemsTempFiles/
+
 # ignore Quartus II generated files
 *_generation_script*
 *_inst.vhd
