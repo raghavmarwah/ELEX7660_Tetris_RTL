@@ -75,21 +75,22 @@
 #define FRAME_SIZE ((LCD_MAX_X + 1) * (LCD_MAX_Y + 1))
 
 // Paddle parameters
-#define PADDLE_WIDTH 20
+#define PADDLE_WIDTH 25
 #define PADDLE_HEIGHT 5
 #define PADDLE_Y (LCD_MAX_Y - PADDLE_HEIGHT)  // Paddle drawn near bottom
 
 // additional functions
 void lcdWrite(unsigned char byte, int isData);
 void lcdWriteBulk(uint8_t *data, int len);
-uint16_t get_paddle_x();
+uint16_t get_adc_value();
 
 int main() {
 
 	// create a local frame buffer to hold the dynamic image (each pixel is 16 bits)
     unsigned short framebuffer[FRAME_SIZE];
     // paddle x-position
-	uint8_t paddle_x = 0;  
+	uint16_t paddle_x = (LCD_MAX_X + 1 - PADDLE_WIDTH) / 2;
+	uint16_t adc_value = 0;  
 
 	// send controller initialization sequence
 	(*(int*)PIO_BASE) &= ~LCD_RST;
@@ -156,8 +157,13 @@ int main() {
         }
 
         // read current paddle position from joystick (ADC)
-        paddle_x = get_paddle_x();
-		//paddle_x += 10;
+        adc_value = get_adc_value();
+		if (adc_value < 1500) {
+			paddle_x -= 10;
+		}
+		else if (adc_value > 1800){
+			paddle_x += 10;
+		}
 
         // ensure paddle stays within bounds:
         if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
@@ -198,13 +204,7 @@ void lcdWriteBulk(uint8_t *data, int len) {
 }
 
 // function to get joystick X-axis position
-// uint16_t get_paddle_x() {
-// 	// mask only 12-bit ADC result
-//     return (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;
-// }
-uint16_t get_paddle_x() {
-    //uint16_t value = (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;  // Mask 12-bit ADC value
-    uint32_t value = (*(volatile uint32_t*) ADC_BASE_ADDR);
-	printf("Joystick ADC Value: %u\n", value);
-    return value;
+uint16_t get_adc_value() {
+	// mask only 12-bit ADC result
+    return (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;
 }

@@ -43,26 +43,20 @@ module breakout_top (
         .num  (disp_digit),
         .leds (leds)
     );
-    // adcinterface adc_int_0 (
-    //     .clk          (clk_div_count[14]),
-    //     .reset_n      (s1),
-    //     .chan         ('0),       // channel 0: joystick X-axis
-    //     .result       (adc_value),
-    //     .avs_read     (avs_read),
-    //     .avs_readdata (avs_readdata),
-    //     .ADC_SDO      (ADC_SDO),
-    //     .ADC_CONVST   (ADC_CONVST),
-    //     .ADC_SCK      (ADC_SCK),
-    //     .ADC_SDI      (ADC_SDI)
-    // );
     breakout breakout_0 (
-		.clk_clk             (FPGA_CLK1_50),
-		.gpio_export         (gpio),
-		.reset_reset_n       (s1),
-		.spi_0_external_MISO ('0),
-		.spi_0_external_MOSI (lcd_sda),
-		.spi_0_external_SCLK (lcd_scl),
-		.spi_0_external_SS_n (lcd_cs)
+	    .clk_clk                (FPGA_CLK1_50),
+		.gpio_export            (gpio),
+		.reset_reset_n          (s1),
+        .lcd_signals_MISO       ('0),
+		.lcd_signals_MOSI       (lcd_sda),
+		.lcd_signals_SCLK       (lcd_scl),
+		.lcd_signals_SS_n       (lcd_cs),
+        .adc_signals_adc_convst (ADC_CONVST),
+		.adc_signals_adc_sck    (ADC_SCK),
+		.adc_signals_adc_sdi    (ADC_SDI),
+		.adc_signals_adc_sdo    (ADC_SDO),
+		.adc_signals_chan       ('0),
+		.adc_signals_result     (adc_value)
 	);
  	
     // control the display data/command (lcd_rs) with gpio[0] from processor

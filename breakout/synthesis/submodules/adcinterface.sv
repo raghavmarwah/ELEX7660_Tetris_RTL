@@ -28,11 +28,19 @@ module adcinterface (
     // 6-bit shift register for config word
     logic [5:0] sdi_shift_reg;     
     // 12-bit shift register for ADC output
-    logic [11:0] sdo_shift_reg;    
+    logic [11:0] sdo_shift_reg;
+    
+    // count used to divide clock
+    logic [15:0] clk_div_count;
+    logic clk2; 
+    // clock divider
+    always_ff @(posedge clk) 
+		clk_div_count <= clk_div_count + 1'b1 ;
+    assign clk2 = clk_div_count[14];   
 
 	// conversion cycle counter; sequential 4-bit counter
 	// increments on the negative edge of clk
-    always_ff @(negedge clk, negedge reset_n) begin
+    always_ff @(negedge clk2, negedge reset_n) begin
         if (~reset_n) begin
             conv_cycle_count <= 4'd0;
         end
@@ -46,7 +54,7 @@ module adcinterface (
         sck_enable = (conv_cycle_count >= 4'd2) && (conv_cycle_count <= 4'd13);
 
         // gate the system clock onto ADC_SCK only when sck_enable is high
-        ADC_SCK = sck_enable ? clk : 1'b0;
+        ADC_SCK = sck_enable ? clk2 : 1'b0;
 
         // pulse ADC_CONVST high for one clock cycle when conv_cycle_count == 0
         ADC_CONVST = (&(~conv_cycle_count)) ? 1'b1 : 1'b0;
@@ -86,6 +94,11 @@ module adcinterface (
 
     // Avalon-MM read operation
     // send 12-bit ADC result to CPU (upper 20 bits are 0)
-    assign avs_readdata = {20'd0, result};
+    //assign avs_readdata = {20'd0, result};
+    always_ff @(posedge clk) begin
+        if (avs_read) begin
+            avs_readdata <= {20'd0, result}; // Update only on read request
+        end
+    end
 
 endmodule

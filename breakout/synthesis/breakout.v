@@ -4,19 +4,19 @@
 
 `timescale 1 ps / 1 ps
 module breakout (
-		output wire        adcinterface_0_conduit_end_adc_convst, // adcinterface_0_conduit_end.adc_convst
-		output wire        adcinterface_0_conduit_end_adc_sck,    //                           .adc_sck
-		output wire        adcinterface_0_conduit_end_adc_sdi,    //                           .adc_sdi
-		input  wire        adcinterface_0_conduit_end_adc_sdo,    //                           .adc_sdo
-		input  wire [2:0]  adcinterface_0_conduit_end_chan,       //                           .chan
-		output wire [11:0] adcinterface_0_conduit_end_result,     //                           .result
-		input  wire        clk_clk,                               //                        clk.clk
-		output wire [7:0]  gpio_export,                           //                       gpio.export
-		input  wire        reset_reset_n,                         //                      reset.reset_n
-		input  wire        spi_0_external_MISO,                   //             spi_0_external.MISO
-		output wire        spi_0_external_MOSI,                   //                           .MOSI
-		output wire        spi_0_external_SCLK,                   //                           .SCLK
-		output wire        spi_0_external_SS_n                    //                           .SS_n
+		output wire        adc_signals_adc_convst, // adc_signals.adc_convst
+		output wire        adc_signals_adc_sck,    //            .adc_sck
+		output wire        adc_signals_adc_sdi,    //            .adc_sdi
+		input  wire        adc_signals_adc_sdo,    //            .adc_sdo
+		input  wire [2:0]  adc_signals_chan,       //            .chan
+		output wire [11:0] adc_signals_result,     //            .result
+		input  wire        clk_clk,                //         clk.clk
+		output wire [7:0]  gpio_export,            //        gpio.export
+		input  wire        lcd_signals_MISO,       // lcd_signals.MISO
+		output wire        lcd_signals_MOSI,       //            .MOSI
+		output wire        lcd_signals_SCLK,       //            .SCLK
+		output wire        lcd_signals_SS_n,       //            .SS_n
+		input  wire        reset_reset_n           //       reset.reset_n
 	);
 
 	wire  [31:0] processor_data_master_readdata;                            // mm_interconnect_0:processor_data_master_readdata -> processor:d_readdata
@@ -83,12 +83,12 @@ module breakout (
 		.reset_n      (~rst_controller_reset_out_reset),                          //          reset.reset_n
 		.avs_read     (mm_interconnect_0_adcinterface_0_avalon_slave_0_read),     // avalon_slave_0.read
 		.avs_readdata (mm_interconnect_0_adcinterface_0_avalon_slave_0_readdata), //               .readdata
-		.ADC_CONVST   (adcinterface_0_conduit_end_adc_convst),                    //    conduit_end.adc_convst
-		.ADC_SCK      (adcinterface_0_conduit_end_adc_sck),                       //               .adc_sck
-		.ADC_SDI      (adcinterface_0_conduit_end_adc_sdi),                       //               .adc_sdi
-		.ADC_SDO      (adcinterface_0_conduit_end_adc_sdo),                       //               .adc_sdo
-		.chan         (adcinterface_0_conduit_end_chan),                          //               .chan
-		.result       (adcinterface_0_conduit_end_result)                         //               .result
+		.ADC_CONVST   (adc_signals_adc_convst),                                   //    conduit_end.adc_convst
+		.ADC_SCK      (adc_signals_adc_sck),                                      //               .adc_sck
+		.ADC_SDI      (adc_signals_adc_sdi),                                      //               .adc_sdi
+		.ADC_SDO      (adc_signals_adc_sdo),                                      //               .adc_sdo
+		.chan         (adc_signals_chan),                                         //               .chan
+		.result       (adc_signals_result)                                        //               .result
 	);
 
 	breakout_jtag_uart jtag_uart (
@@ -168,10 +168,10 @@ module breakout (
 		.spi_select    (mm_interconnect_0_spi_0_spi_control_port_chipselect), //                 .chipselect
 		.write_n       (~mm_interconnect_0_spi_0_spi_control_port_write),     //                 .write_n
 		.irq           (irq_mapper_receiver2_irq),                            //              irq.irq
-		.MISO          (spi_0_external_MISO),                                 //         external.export
-		.MOSI          (spi_0_external_MOSI),                                 //                 .export
-		.SCLK          (spi_0_external_SCLK),                                 //                 .export
-		.SS_n          (spi_0_external_SS_n)                                  //                 .export
+		.MISO          (lcd_signals_MISO),                                    //         external.export
+		.MOSI          (lcd_signals_MOSI),                                    //                 .export
+		.SCLK          (lcd_signals_SCLK),                                    //                 .export
+		.SS_n          (lcd_signals_SS_n)                                     //                 .export
 	);
 
 	breakout_timer timer (

@@ -143,7 +143,7 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface
-   name="adcinterface_0_conduit_end"
+   name="adc_signals"
    internal="adcinterface_0.conduit_end"
    type="conduit"
    dir="end" />
@@ -153,12 +153,8 @@
    internal="pio.external_connection"
    type="conduit"
    dir="end" />
+ <interface name="lcd_signals" internal="spi_0.external" type="conduit" dir="end" />
  <interface name="reset" internal="clock.clk_in_reset" type="reset" dir="end" />
- <interface
-   name="spi_0_external"
-   internal="spi_0.external"
-   type="conduit"
-   dir="end" />
  <module name="adcinterface_0" kind="adcinterface" version="1.0" enabled="1" />
  <module name="clock" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="50000000" />
