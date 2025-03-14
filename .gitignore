@@ -11,13 +11,13 @@
 # *.sdc
 
 # ignore Quartus II generated folders
-*_sim
-db
-greybox_tmp
-incremental_db
-simulation
-testbench
-timing
+*_sim/
+db/
+greybox_tmp/
+incremental_db/
+simulation/
+testbench/
+timing/
 
 # ignore Quartus II generated files
 *_generation_script*

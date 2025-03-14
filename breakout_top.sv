@@ -7,19 +7,47 @@ module breakout_top (
     input  logic FPGA_CLK1_50,      // 50 MHz input clock
     input  logic s1,                // S1 pushbutton
     input  logic s2,                // S2 pushbutton
+    input  logic ADC_SDO,           // serial data out (from ADC)
+    output logic ADC_CONVST,        // ADC start conversion
+    output logic ADC_SCK,           // ADC serial clock
+    output logic ADC_SDI,           // serial data in (to ADC)
     output logic lcd_sda,           // SPI data signal to LCD
     output logic lcd_scl,           // SPI clock signal to LCD
     output logic lcd_cs,            // SPI chip select signal to LCD
     output logic lcd_rs,            // LCD data/command signal
     output logic lcd_rst,           // LCD reset signal
-    output logic red, green, blue   // RGB LED signals
+    output logic red, green, blue,  // RGB LED signals
+    output logic [7:0] leds,        // 7-seg LED enables
+    output logic [3:0] ct           // digit cathodes for 7-segment display
 );
 
-    // gpio signal from processor
-    logic [7:0] gpio;  
+    logic [7:0]  gpio;               // gpio signal from processor
+    logic [1:0]  digit;  		     // select digit to display
+	logic [3:0]  disp_digit;  	     // current digit of count to display
+	logic [15:0] clk_div_count;      // count used to divide clock
+    logic [11:0] adc_val;            // 12-bit ADC output
+    logic [2:0]  channel_val;        // 3-bit selected channel
 
-    // instantiate processor system
-    breakout b0 (
+    // instantiate modules
+    decode2 decode2_0 (
+        .digit (digit),
+        .ct    (ct)
+    );
+	decode7 decode7_0 (
+        .num  (disp_digit),
+        .leds (leds)
+    );
+    adcinterface adc_int_0 (
+        .clk        (clk_div_count[14]),
+        .reset_n    (s1),
+        .chan       (channel_val),
+        .result     (adc_val),
+        .ADC_SDO    (ADC_SDO),
+        .ADC_CONVST (ADC_CONVST),
+        .ADC_SCK    (ADC_SCK),
+        .ADC_SDI    (ADC_SDI)
+    );
+    breakout breakout_0 (
 		.clk_clk             (FPGA_CLK1_50),
 		.gpio_export         (gpio),
 		.reset_reset_n       (s1),
@@ -37,5 +65,25 @@ module breakout_top (
 
 	// turn off the RGB LED on the BoosterPack
 	assign {red, green, blue} = '0;
+
+    // use count to divide clock and generate a 2-bit digit counter to determine which digit to display
+	always_ff @(posedge CLOCK_50) 
+		clk_div_count <= clk_div_count + 1'b1 ;
+
+	// assign the top two bits of count to select digit to display
+	assign digit = clk_div_count[15:14];  
+
+    // 7-segment LED display multiplexing
+    // display the selected channel (channel_val) on first digit
+    // display 12-bit ADC value (adc_val) as HEX on the other 3 digits
+    always_comb begin
+       case(digit)
+            2'b00: disp_digit = adc_val[3:0];
+            2'b01: disp_digit = adc_val[7:4];
+            2'b10: disp_digit = adc_val[11:8];
+		    2'b11: disp_digit = {1'b0, channel_val};
+			default: disp_digit = 4'd0; // default case to prevent any problems
+		endcase
+    end 
 
 endmodule
