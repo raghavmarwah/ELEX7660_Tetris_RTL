@@ -8,6 +8,7 @@
 #include <altera_avalon_spi.h> // function to control altera SPI IP
 #include <unistd.h>     // usleep()
 #include <stdint.h>
+#include <stdio.h>
 
 // Avalon-MM register with ADC data
 #define ADC_BASE_ADDR ADCINTERFACE_0_BASE
@@ -116,7 +117,7 @@ int main() {
 
 	lcdWrite(CM_MADCTL, CMD);
 	// rotate 90 degrees, mirror vertically, mirror horizontally
-	lcdWrite(CM_MADCTL_MV | CM_MADCTL_MY | CM_MADCTL_MX, DATA);
+	lcdWrite(CM_MADCTL_MV | CM_MADCTL_MY | CM_MADCTL_MX | CM_MADCTL_BGR, DATA);
 
 	lcdWrite(CM_NORON, CMD);
 
@@ -138,17 +139,18 @@ int main() {
 	lcdWrite(LCD_MAX_Y + Y_CORRECTION_OFFSET, DATA);
 
 	// set RAM for writing
+	lcdWrite(CM_NOP, CMD);
     lcdWrite(CM_RAMWR, CMD);
 
     // main loop: dynamically update framebuffer
     while(1) {
-        // fill framebuffer with empty (black) background
+        // fill framebuffer with background
         for (int x = 0; x <= LCD_MAX_X; x++) {
             for (int y = 0; y <= LCD_MAX_Y; y++) {
-                int index = x * (LCD_MAX_Y + 1) + y;
+                int index = y * (LCD_MAX_X + 1) + x;
                 // combine two bytes from the image array into a 16-bit value
-                // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL] << 8)
-                //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1];
+                // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1] << 8)
+                //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL];
 				framebuffer[index] = 0;
             }
         }
@@ -173,6 +175,7 @@ int main() {
         lcdWrite(CM_RAMWR, CMD);
 		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
     }
+
 }
 
 void lcdWrite(unsigned char byte, int isData) {
@@ -195,7 +198,13 @@ void lcdWriteBulk(uint8_t *data, int len) {
 }
 
 // function to get joystick X-axis position
+// uint16_t get_paddle_x() {
+// 	// mask only 12-bit ADC result
+//     return (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;
+// }
 uint16_t get_paddle_x() {
-	// mask only 12-bit ADC result
-    return (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;
+    //uint16_t value = (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;  // Mask 12-bit ADC value
+    uint32_t value = (*(volatile uint32_t*) ADC_BASE_ADDR);
+	printf("Joystick ADC Value: %u\n", value);
+    return value;
 }

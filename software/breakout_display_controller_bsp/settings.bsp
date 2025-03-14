@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>13-Mar-2025 10:48:34 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1741931314192</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>14-Mar-2025 12:29:13 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1741980553407</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\intelFPGA_lite\18.1\ELEX7660_Breakout_FPGA\software\breakout_display_controller_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\breakout.sopcinfo</SopcDesignFile>
@@ -734,7 +734,7 @@
                 <SettingName>hal.enable_small_c_library</SettingName>
                 <Identifier>none</Identifier>
                 <Type>Boolean</Type>
-                <Value>0</Value>
+                <Value>1</Value>
                 <DefaultValue>0</DefaultValue>
                 <DestinationFile>public_mk_define</DestinationFile>
                 <Description>Causes the small newlib (C library) to be used. This reduces code and data footprint at the expense of reduced functionality. Several newlib features are removed such as floating-point support in printf(), stdin input routines, and buffered I/O. The small C library is not compatible with Micrium MicroC/OS-II. If true, adds -msmallc to ALT_LDFLAGS in public.mk.</Description>
