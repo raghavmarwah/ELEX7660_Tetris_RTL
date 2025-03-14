@@ -8,11 +8,11 @@ module breakout (
 	adc_signals_result,
 	clk_clk,
 	gpio_export,
-	reset_reset_n,
 	lcd_signals_MISO,
 	lcd_signals_MOSI,
 	lcd_signals_SCLK,
-	lcd_signals_SS_n);	
+	lcd_signals_SS_n,
+	reset_reset_n);	
 
 	output		adc_signals_adc_convst;
 	output		adc_signals_adc_sck;
@@ -22,9 +22,9 @@ module breakout (
 	output	[11:0]	adc_signals_result;
 	input		clk_clk;
 	output	[7:0]	gpio_export;
-	input		reset_reset_n;
 	input		lcd_signals_MISO;
 	output		lcd_signals_MOSI;
 	output		lcd_signals_SCLK;
 	output		lcd_signals_SS_n;
+	input		reset_reset_n;
 endmodule

@@ -7,10 +7,10 @@
 		.adc_signals_result     (<connected-to-adc_signals_result>),     //            .result
 		.clk_clk                (<connected-to-clk_clk>),                //         clk.clk
 		.gpio_export            (<connected-to-gpio_export>),            //        gpio.export
-		.reset_reset_n          (<connected-to-reset_reset_n>),          //       reset.reset_n
 		.lcd_signals_MISO       (<connected-to-lcd_signals_MISO>),       // lcd_signals.MISO
 		.lcd_signals_MOSI       (<connected-to-lcd_signals_MOSI>),       //            .MOSI
 		.lcd_signals_SCLK       (<connected-to-lcd_signals_SCLK>),       //            .SCLK
-		.lcd_signals_SS_n       (<connected-to-lcd_signals_SS_n>)        //            .SS_n
+		.lcd_signals_SS_n       (<connected-to-lcd_signals_SS_n>),       //            .SS_n
+		.reset_reset_n          (<connected-to-reset_reset_n>)           //       reset.reset_n
 	);
 

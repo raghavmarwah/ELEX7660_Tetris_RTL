@@ -39,7 +39,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  10 .debug_abbrev 00002b57  00000000  00000000  00014722  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_line   00002dd5  00000000  00000000  00017279  2**0
+ 11 .debug_line   00002dd7  00000000  00000000  00017279  2**0
                   CONTENTS, READONLY, DEBUGGING
  12 .debug_frame  00000c64  00000000  00000000  0001a050  2**2
                   CONTENTS, READONLY, DEBUGGING
@@ -71,7 +71,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  26 .jdi          00004eea  00000000  00000000  0001f330  2**0
                   CONTENTS, READONLY
- 27 .sopcinfo     00043c08  00000000  00000000  0002421a  2**0
+ 27 .sopcinfo     00043c07  00000000  00000000  0002421a  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00020000 l    d  .entry	00000000 .entry
@@ -729,9 +729,10 @@ int main() {
    2027c:	023ffff4 	movhi	r8,65535
    20280:	421ff804 	addi	r8,r8,32736
    20284:	da37883a 	add	sp,sp,r8
-
 	// create a local frame buffer to hold the dynamic image (each pixel is 16 bits)
-    unsigned short framebuffer[FRAME_SIZE];
+    //unsigned short framebuffer[FRAME_SIZE];
+	__attribute__((aligned(4))) unsigned short framebuffer[FRAME_SIZE];
+
     // paddle x-position
 	uint16_t paddle_x = (LCD_MAX_X + 1 - PADDLE_WIDTH) / 2;
    20288:	00800cc4 	movi	r2,51
@@ -907,261 +908,264 @@ int main() {
 
     // main loop: dynamically update framebuffer
     while(1) {
+
+		// write framebuffer to RAM
+        lcdWrite(CM_RAMWR, CMD);
+   20460:	000b883a 	mov	r5,zero
+   20464:	01000b04 	movi	r4,44
+   20468:	002076c0 	call	2076c <lcdWrite>
+		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
+   2046c:	e0a00004 	addi	r2,fp,-32768
+   20470:	01600014 	movui	r5,32768
+   20474:	1009883a 	mov	r4,r2
+   20478:	00208140 	call	20814 <lcdWriteBulk>
+
         // fill framebuffer with background
         for (int x = 0; x <= LCD_MAX_X; x++) {
-   20460:	00bffff4 	movhi	r2,65535
-   20464:	109ff904 	addi	r2,r2,32740
-   20468:	1705883a 	add	r2,r2,fp
-   2046c:	10000015 	stw	zero,0(r2)
-   20470:	00003606 	br	2054c <main+0x2e0>
+   2047c:	00bffff4 	movhi	r2,65535
+   20480:	109ff904 	addi	r2,r2,32740
+   20484:	1705883a 	add	r2,r2,fp
+   20488:	10000015 	stw	zero,0(r2)
+   2048c:	00003606 	br	20568 <main+0x2fc>
             for (int y = 0; y <= LCD_MAX_Y; y++) {
-   20474:	00fffff4 	movhi	r3,65535
-   20478:	18dffa04 	addi	r3,r3,32744
-   2047c:	1f07883a 	add	r3,r3,fp
-   20480:	18000015 	stw	zero,0(r3)
-   20484:	00002206 	br	20510 <main+0x2a4>
+   20490:	00fffff4 	movhi	r3,65535
+   20494:	18dffa04 	addi	r3,r3,32744
+   20498:	1f07883a 	add	r3,r3,fp
+   2049c:	18000015 	stw	zero,0(r3)
+   204a0:	00002206 	br	2052c <main+0x2c0>
                 int index = y * (LCD_MAX_X + 1) + x;
-   20488:	013ffff4 	movhi	r4,65535
-   2048c:	211ffa04 	addi	r4,r4,32744
-   20490:	2709883a 	add	r4,r4,fp
-   20494:	20800017 	ldw	r2,0(r4)
-   20498:	100691fa 	slli	r3,r2,7
-   2049c:	013ffff4 	movhi	r4,65535
-   204a0:	211ff904 	addi	r4,r4,32740
-   204a4:	2709883a 	add	r4,r4,fp
-   204a8:	20800017 	ldw	r2,0(r4)
-   204ac:	1885883a 	add	r2,r3,r2
-   204b0:	00fffff4 	movhi	r3,65535
-   204b4:	18dfff04 	addi	r3,r3,32764
-   204b8:	1f07883a 	add	r3,r3,fp
-   204bc:	18800015 	stw	r2,0(r3)
+   204a4:	013ffff4 	movhi	r4,65535
+   204a8:	211ffa04 	addi	r4,r4,32744
+   204ac:	2709883a 	add	r4,r4,fp
+   204b0:	20800017 	ldw	r2,0(r4)
+   204b4:	100691fa 	slli	r3,r2,7
+   204b8:	013ffff4 	movhi	r4,65535
+   204bc:	211ff904 	addi	r4,r4,32740
+   204c0:	2709883a 	add	r4,r4,fp
+   204c4:	20800017 	ldw	r2,0(r4)
+   204c8:	1885883a 	add	r2,r3,r2
+   204cc:	00fffff4 	movhi	r3,65535
+   204d0:	18dfff04 	addi	r3,r3,32764
+   204d4:	1f07883a 	add	r3,r3,fp
+   204d8:	18800015 	stw	r2,0(r3)
                 // combine two bytes from the image array into a 16-bit value
                 // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1] << 8)
                 //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL];
 				framebuffer[index] = 0;
-   204c0:	013ffff4 	movhi	r4,65535
-   204c4:	211fff04 	addi	r4,r4,32764
-   204c8:	2709883a 	add	r4,r4,fp
-   204cc:	20800017 	ldw	r2,0(r4)
-   204d0:	1085883a 	add	r2,r2,r2
-   204d4:	00fffff4 	movhi	r3,65535
-   204d8:	18dff804 	addi	r3,r3,32736
-   204dc:	1f07883a 	add	r3,r3,fp
-   204e0:	1885883a 	add	r2,r3,r2
-   204e4:	10800804 	addi	r2,r2,32
-   204e8:	1000000d 	sth	zero,0(r2)
+   204dc:	013ffff4 	movhi	r4,65535
+   204e0:	211fff04 	addi	r4,r4,32764
+   204e4:	2709883a 	add	r4,r4,fp
+   204e8:	20800017 	ldw	r2,0(r4)
+   204ec:	1085883a 	add	r2,r2,r2
+   204f0:	00fffff4 	movhi	r3,65535
+   204f4:	18dff804 	addi	r3,r3,32736
+   204f8:	1f07883a 	add	r3,r3,fp
+   204fc:	1885883a 	add	r2,r3,r2
+   20500:	10800804 	addi	r2,r2,32
+   20504:	1000000d 	sth	zero,0(r2)
+        lcdWrite(CM_RAMWR, CMD);
+		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
 
-    // main loop: dynamically update framebuffer
-    while(1) {
         // fill framebuffer with background
         for (int x = 0; x <= LCD_MAX_X; x++) {
             for (int y = 0; y <= LCD_MAX_Y; y++) {
-   204ec:	013ffff4 	movhi	r4,65535
-   204f0:	211ffa04 	addi	r4,r4,32744
-   204f4:	2709883a 	add	r4,r4,fp
-   204f8:	20800017 	ldw	r2,0(r4)
-   204fc:	10800044 	addi	r2,r2,1
-   20500:	00fffff4 	movhi	r3,65535
-   20504:	18dffa04 	addi	r3,r3,32744
-   20508:	1f07883a 	add	r3,r3,fp
-   2050c:	18800015 	stw	r2,0(r3)
-   20510:	013ffff4 	movhi	r4,65535
-   20514:	211ffa04 	addi	r4,r4,32744
-   20518:	2709883a 	add	r4,r4,fp
-   2051c:	20800017 	ldw	r2,0(r4)
-   20520:	10802010 	cmplti	r2,r2,128
-   20524:	103fd81e 	bne	r2,zero,20488 <__alt_data_end+0xfffe0488>
-    lcdWrite(CM_RAMWR, CMD);
+   20508:	013ffff4 	movhi	r4,65535
+   2050c:	211ffa04 	addi	r4,r4,32744
+   20510:	2709883a 	add	r4,r4,fp
+   20514:	20800017 	ldw	r2,0(r4)
+   20518:	10800044 	addi	r2,r2,1
+   2051c:	00fffff4 	movhi	r3,65535
+   20520:	18dffa04 	addi	r3,r3,32744
+   20524:	1f07883a 	add	r3,r3,fp
+   20528:	18800015 	stw	r2,0(r3)
+   2052c:	013ffff4 	movhi	r4,65535
+   20530:	211ffa04 	addi	r4,r4,32744
+   20534:	2709883a 	add	r4,r4,fp
+   20538:	20800017 	ldw	r2,0(r4)
+   2053c:	10802010 	cmplti	r2,r2,128
+   20540:	103fd81e 	bne	r2,zero,204a4 <__alt_data_end+0xfffe04a4>
+		// write framebuffer to RAM
+        lcdWrite(CM_RAMWR, CMD);
+		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
 
-    // main loop: dynamically update framebuffer
-    while(1) {
         // fill framebuffer with background
         for (int x = 0; x <= LCD_MAX_X; x++) {
-   20528:	00fffff4 	movhi	r3,65535
-   2052c:	18dff904 	addi	r3,r3,32740
-   20530:	1f07883a 	add	r3,r3,fp
-   20534:	18800017 	ldw	r2,0(r3)
-   20538:	10800044 	addi	r2,r2,1
-   2053c:	013ffff4 	movhi	r4,65535
-   20540:	211ff904 	addi	r4,r4,32740
-   20544:	2709883a 	add	r4,r4,fp
-   20548:	20800015 	stw	r2,0(r4)
-   2054c:	00fffff4 	movhi	r3,65535
-   20550:	18dff904 	addi	r3,r3,32740
-   20554:	1f07883a 	add	r3,r3,fp
-   20558:	18800017 	ldw	r2,0(r3)
-   2055c:	10802010 	cmplti	r2,r2,128
-   20560:	103fc41e 	bne	r2,zero,20474 <__alt_data_end+0xfffe0474>
+   20544:	00fffff4 	movhi	r3,65535
+   20548:	18dff904 	addi	r3,r3,32740
+   2054c:	1f07883a 	add	r3,r3,fp
+   20550:	18800017 	ldw	r2,0(r3)
+   20554:	10800044 	addi	r2,r2,1
+   20558:	013ffff4 	movhi	r4,65535
+   2055c:	211ff904 	addi	r4,r4,32740
+   20560:	2709883a 	add	r4,r4,fp
+   20564:	20800015 	stw	r2,0(r4)
+   20568:	00fffff4 	movhi	r3,65535
+   2056c:	18dff904 	addi	r3,r3,32740
+   20570:	1f07883a 	add	r3,r3,fp
+   20574:	18800017 	ldw	r2,0(r3)
+   20578:	10802010 	cmplti	r2,r2,128
+   2057c:	103fc41e 	bne	r2,zero,20490 <__alt_data_end+0xfffe0490>
 				framebuffer[index] = 0;
             }
         }
 
         // read current paddle position from joystick (ADC)
         adc_value = get_adc_value();
-   20564:	00208880 	call	20888 <get_adc_value>
-   20568:	013ffff4 	movhi	r4,65535
-   2056c:	211ffd04 	addi	r4,r4,32756
-   20570:	2709883a 	add	r4,r4,fp
-   20574:	2080000d 	sth	r2,0(r4)
+   20580:	00208880 	call	20888 <get_adc_value>
+   20584:	013ffff4 	movhi	r4,65535
+   20588:	211ffd04 	addi	r4,r4,32756
+   2058c:	2709883a 	add	r4,r4,fp
+   20590:	2080000d 	sth	r2,0(r4)
 		if (adc_value < 1500) {
-   20578:	00fffff4 	movhi	r3,65535
-   2057c:	18dffd04 	addi	r3,r3,32756
-   20580:	1f07883a 	add	r3,r3,fp
-   20584:	1880000b 	ldhu	r2,0(r3)
-   20588:	10817728 	cmpgeui	r2,r2,1500
-   2058c:	10000a1e 	bne	r2,zero,205b8 <main+0x34c>
+   20594:	00fffff4 	movhi	r3,65535
+   20598:	18dffd04 	addi	r3,r3,32756
+   2059c:	1f07883a 	add	r3,r3,fp
+   205a0:	1880000b 	ldhu	r2,0(r3)
+   205a4:	10817728 	cmpgeui	r2,r2,1500
+   205a8:	10000a1e 	bne	r2,zero,205d4 <main+0x368>
 			paddle_x -= 10;
-   20590:	013ffff4 	movhi	r4,65535
-   20594:	211ff804 	addi	r4,r4,32736
-   20598:	2709883a 	add	r4,r4,fp
-   2059c:	2080000b 	ldhu	r2,0(r4)
-   205a0:	10bffd84 	addi	r2,r2,-10
-   205a4:	00fffff4 	movhi	r3,65535
-   205a8:	18dff804 	addi	r3,r3,32736
-   205ac:	1f07883a 	add	r3,r3,fp
-   205b0:	1880000d 	sth	r2,0(r3)
-   205b4:	00000f06 	br	205f4 <main+0x388>
+   205ac:	013ffff4 	movhi	r4,65535
+   205b0:	211ff804 	addi	r4,r4,32736
+   205b4:	2709883a 	add	r4,r4,fp
+   205b8:	2080000b 	ldhu	r2,0(r4)
+   205bc:	10bffd84 	addi	r2,r2,-10
+   205c0:	00fffff4 	movhi	r3,65535
+   205c4:	18dff804 	addi	r3,r3,32736
+   205c8:	1f07883a 	add	r3,r3,fp
+   205cc:	1880000d 	sth	r2,0(r3)
+   205d0:	00000f06 	br	20610 <main+0x3a4>
 		}
 		else if (adc_value > 1800){
-   205b8:	013ffff4 	movhi	r4,65535
-   205bc:	211ffd04 	addi	r4,r4,32756
-   205c0:	2709883a 	add	r4,r4,fp
-   205c4:	2080000b 	ldhu	r2,0(r4)
-   205c8:	1081c270 	cmpltui	r2,r2,1801
-   205cc:	1000091e 	bne	r2,zero,205f4 <main+0x388>
+   205d4:	013ffff4 	movhi	r4,65535
+   205d8:	211ffd04 	addi	r4,r4,32756
+   205dc:	2709883a 	add	r4,r4,fp
+   205e0:	2080000b 	ldhu	r2,0(r4)
+   205e4:	1081c270 	cmpltui	r2,r2,1801
+   205e8:	1000091e 	bne	r2,zero,20610 <main+0x3a4>
 			paddle_x += 10;
-   205d0:	00fffff4 	movhi	r3,65535
-   205d4:	18dff804 	addi	r3,r3,32736
-   205d8:	1f07883a 	add	r3,r3,fp
-   205dc:	1880000b 	ldhu	r2,0(r3)
-   205e0:	10800284 	addi	r2,r2,10
-   205e4:	013ffff4 	movhi	r4,65535
-   205e8:	211ff804 	addi	r4,r4,32736
-   205ec:	2709883a 	add	r4,r4,fp
-   205f0:	2080000d 	sth	r2,0(r4)
+   205ec:	00fffff4 	movhi	r3,65535
+   205f0:	18dff804 	addi	r3,r3,32736
+   205f4:	1f07883a 	add	r3,r3,fp
+   205f8:	1880000b 	ldhu	r2,0(r3)
+   205fc:	10800284 	addi	r2,r2,10
+   20600:	013ffff4 	movhi	r4,65535
+   20604:	211ff804 	addi	r4,r4,32736
+   20608:	2709883a 	add	r4,r4,fp
+   2060c:	2080000d 	sth	r2,0(r4)
 		}
 
         // ensure paddle stays within bounds:
         if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
-   205f4:	00fffff4 	movhi	r3,65535
-   205f8:	18dff804 	addi	r3,r3,32736
-   205fc:	1f07883a 	add	r3,r3,fp
-   20600:	1880000b 	ldhu	r2,0(r3)
-   20604:	10801a30 	cmpltui	r2,r2,104
-   20608:	1000051e 	bne	r2,zero,20620 <main+0x3b4>
+   20610:	00fffff4 	movhi	r3,65535
+   20614:	18dff804 	addi	r3,r3,32736
+   20618:	1f07883a 	add	r3,r3,fp
+   2061c:	1880000b 	ldhu	r2,0(r3)
+   20620:	10801a30 	cmpltui	r2,r2,104
+   20624:	1000051e 	bne	r2,zero,2063c <main+0x3d0>
             paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
-   2060c:	008019c4 	movi	r2,103
-   20610:	013ffff4 	movhi	r4,65535
-   20614:	211ff804 	addi	r4,r4,32736
-   20618:	2709883a 	add	r4,r4,fp
-   2061c:	2080000d 	sth	r2,0(r4)
+   20628:	008019c4 	movi	r2,103
+   2062c:	013ffff4 	movhi	r4,65535
+   20630:	211ff804 	addi	r4,r4,32736
+   20634:	2709883a 	add	r4,r4,fp
+   20638:	2080000d 	sth	r2,0(r4)
 
         // draw paddle into the framebuffer
         for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
-   20620:	00fffff4 	movhi	r3,65535
-   20624:	18dff804 	addi	r3,r3,32736
-   20628:	1f07883a 	add	r3,r3,fp
-   2062c:	1880000b 	ldhu	r2,0(r3)
-   20630:	013ffff4 	movhi	r4,65535
-   20634:	211ffb04 	addi	r4,r4,32748
-   20638:	2709883a 	add	r4,r4,fp
-   2063c:	20800015 	stw	r2,0(r4)
-   20640:	00003806 	br	20724 <main+0x4b8>
+   2063c:	00fffff4 	movhi	r3,65535
+   20640:	18dff804 	addi	r3,r3,32736
+   20644:	1f07883a 	add	r3,r3,fp
+   20648:	1880000b 	ldhu	r2,0(r3)
+   2064c:	013ffff4 	movhi	r4,65535
+   20650:	211ffb04 	addi	r4,r4,32748
+   20654:	2709883a 	add	r4,r4,fp
+   20658:	20800015 	stw	r2,0(r4)
+   2065c:	00003806 	br	20740 <main+0x4d4>
             for (int y = PADDLE_Y; y < PADDLE_Y + PADDLE_HEIGHT; y++) {
-   20644:	00801e84 	movi	r2,122
-   20648:	00fffff4 	movhi	r3,65535
-   2064c:	18dffc04 	addi	r3,r3,32752
-   20650:	1f07883a 	add	r3,r3,fp
-   20654:	18800015 	stw	r2,0(r3)
-   20658:	00002306 	br	206e8 <main+0x47c>
+   20660:	00801e84 	movi	r2,122
+   20664:	00fffff4 	movhi	r3,65535
+   20668:	18dffc04 	addi	r3,r3,32752
+   2066c:	1f07883a 	add	r3,r3,fp
+   20670:	18800015 	stw	r2,0(r3)
+   20674:	00002306 	br	20704 <main+0x498>
                 int index = x * (LCD_MAX_Y + 1) + y;
-   2065c:	013ffff4 	movhi	r4,65535
-   20660:	211ffb04 	addi	r4,r4,32748
-   20664:	2709883a 	add	r4,r4,fp
-   20668:	20800017 	ldw	r2,0(r4)
-   2066c:	100691fa 	slli	r3,r2,7
-   20670:	013ffff4 	movhi	r4,65535
-   20674:	211ffc04 	addi	r4,r4,32752
-   20678:	2709883a 	add	r4,r4,fp
-   2067c:	20800017 	ldw	r2,0(r4)
-   20680:	1885883a 	add	r2,r3,r2
-   20684:	00fffff4 	movhi	r3,65535
-   20688:	18dffe04 	addi	r3,r3,32760
-   2068c:	1f07883a 	add	r3,r3,fp
-   20690:	18800015 	stw	r2,0(r3)
+   20678:	013ffff4 	movhi	r4,65535
+   2067c:	211ffb04 	addi	r4,r4,32748
+   20680:	2709883a 	add	r4,r4,fp
+   20684:	20800017 	ldw	r2,0(r4)
+   20688:	100691fa 	slli	r3,r2,7
+   2068c:	013ffff4 	movhi	r4,65535
+   20690:	211ffc04 	addi	r4,r4,32752
+   20694:	2709883a 	add	r4,r4,fp
+   20698:	20800017 	ldw	r2,0(r4)
+   2069c:	1885883a 	add	r2,r3,r2
+   206a0:	00fffff4 	movhi	r3,65535
+   206a4:	18dffe04 	addi	r3,r3,32760
+   206a8:	1f07883a 	add	r3,r3,fp
+   206ac:	18800015 	stw	r2,0(r3)
                 framebuffer[index] = 0xFFFF; // white color
-   20694:	013ffff4 	movhi	r4,65535
-   20698:	211ffe04 	addi	r4,r4,32760
-   2069c:	2709883a 	add	r4,r4,fp
-   206a0:	20800017 	ldw	r2,0(r4)
-   206a4:	1085883a 	add	r2,r2,r2
-   206a8:	00fffff4 	movhi	r3,65535
-   206ac:	18dff804 	addi	r3,r3,32736
-   206b0:	1f07883a 	add	r3,r3,fp
-   206b4:	1885883a 	add	r2,r3,r2
-   206b8:	10800804 	addi	r2,r2,32
-   206bc:	00ffffc4 	movi	r3,-1
-   206c0:	10c0000d 	sth	r3,0(r2)
+   206b0:	013ffff4 	movhi	r4,65535
+   206b4:	211ffe04 	addi	r4,r4,32760
+   206b8:	2709883a 	add	r4,r4,fp
+   206bc:	20800017 	ldw	r2,0(r4)
+   206c0:	1085883a 	add	r2,r2,r2
+   206c4:	00fffff4 	movhi	r3,65535
+   206c8:	18dff804 	addi	r3,r3,32736
+   206cc:	1f07883a 	add	r3,r3,fp
+   206d0:	1885883a 	add	r2,r3,r2
+   206d4:	10800804 	addi	r2,r2,32
+   206d8:	00ffffc4 	movi	r3,-1
+   206dc:	10c0000d 	sth	r3,0(r2)
         if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
             paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
 
         // draw paddle into the framebuffer
         for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
             for (int y = PADDLE_Y; y < PADDLE_Y + PADDLE_HEIGHT; y++) {
-   206c4:	013ffff4 	movhi	r4,65535
-   206c8:	211ffc04 	addi	r4,r4,32752
-   206cc:	2709883a 	add	r4,r4,fp
-   206d0:	20800017 	ldw	r2,0(r4)
-   206d4:	10800044 	addi	r2,r2,1
-   206d8:	00fffff4 	movhi	r3,65535
-   206dc:	18dffc04 	addi	r3,r3,32752
-   206e0:	1f07883a 	add	r3,r3,fp
-   206e4:	18800015 	stw	r2,0(r3)
-   206e8:	013ffff4 	movhi	r4,65535
-   206ec:	211ffc04 	addi	r4,r4,32752
-   206f0:	2709883a 	add	r4,r4,fp
-   206f4:	20800017 	ldw	r2,0(r4)
-   206f8:	10801fd0 	cmplti	r2,r2,127
-   206fc:	103fd71e 	bne	r2,zero,2065c <__alt_data_end+0xfffe065c>
+   206e0:	013ffff4 	movhi	r4,65535
+   206e4:	211ffc04 	addi	r4,r4,32752
+   206e8:	2709883a 	add	r4,r4,fp
+   206ec:	20800017 	ldw	r2,0(r4)
+   206f0:	10800044 	addi	r2,r2,1
+   206f4:	00fffff4 	movhi	r3,65535
+   206f8:	18dffc04 	addi	r3,r3,32752
+   206fc:	1f07883a 	add	r3,r3,fp
+   20700:	18800015 	stw	r2,0(r3)
+   20704:	013ffff4 	movhi	r4,65535
+   20708:	211ffc04 	addi	r4,r4,32752
+   2070c:	2709883a 	add	r4,r4,fp
+   20710:	20800017 	ldw	r2,0(r4)
+   20714:	10801fd0 	cmplti	r2,r2,127
+   20718:	103fd71e 	bne	r2,zero,20678 <__alt_data_end+0xfffe0678>
         // ensure paddle stays within bounds:
         if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
             paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
 
         // draw paddle into the framebuffer
         for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
-   20700:	00fffff4 	movhi	r3,65535
-   20704:	18dffb04 	addi	r3,r3,32748
-   20708:	1f07883a 	add	r3,r3,fp
-   2070c:	18800017 	ldw	r2,0(r3)
-   20710:	10800044 	addi	r2,r2,1
-   20714:	013ffff4 	movhi	r4,65535
-   20718:	211ffb04 	addi	r4,r4,32748
-   2071c:	2709883a 	add	r4,r4,fp
-   20720:	20800015 	stw	r2,0(r4)
-   20724:	00fffff4 	movhi	r3,65535
-   20728:	18dff804 	addi	r3,r3,32736
-   2072c:	1f07883a 	add	r3,r3,fp
-   20730:	1880000b 	ldhu	r2,0(r3)
-   20734:	10800644 	addi	r2,r2,25
-   20738:	013ffff4 	movhi	r4,65535
-   2073c:	211ffb04 	addi	r4,r4,32748
-   20740:	2709883a 	add	r4,r4,fp
-   20744:	20c00017 	ldw	r3,0(r4)
-   20748:	18bfbe16 	blt	r3,r2,20644 <__alt_data_end+0xfffe0644>
-                framebuffer[index] = 0xFFFF; // white color
-            }
+   2071c:	00fffff4 	movhi	r3,65535
+   20720:	18dffb04 	addi	r3,r3,32748
+   20724:	1f07883a 	add	r3,r3,fp
+   20728:	18800017 	ldw	r2,0(r3)
+   2072c:	10800044 	addi	r2,r2,1
+   20730:	013ffff4 	movhi	r4,65535
+   20734:	211ffb04 	addi	r4,r4,32748
+   20738:	2709883a 	add	r4,r4,fp
+   2073c:	20800015 	stw	r2,0(r4)
+   20740:	00fffff4 	movhi	r3,65535
+   20744:	18dff804 	addi	r3,r3,32736
+   20748:	1f07883a 	add	r3,r3,fp
+   2074c:	1880000b 	ldhu	r2,0(r3)
+   20750:	10800644 	addi	r2,r2,25
+   20754:	013ffff4 	movhi	r4,65535
+   20758:	211ffb04 	addi	r4,r4,32748
+   2075c:	2709883a 	add	r4,r4,fp
+   20760:	20c00017 	ldw	r3,0(r4)
+   20764:	18bfbe16 	blt	r3,r2,20660 <__alt_data_end+0xfffe0660>
         }
 
         // write framebuffer to RAM
-        lcdWrite(CM_RAMWR, CMD);
-   2074c:	000b883a 	mov	r5,zero
-   20750:	01000b04 	movi	r4,44
-   20754:	002076c0 	call	2076c <lcdWrite>
-		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
-   20758:	e0a00004 	addi	r2,fp,-32768
-   2075c:	01600014 	movui	r5,32768
-   20760:	1009883a 	mov	r4,r2
-   20764:	00208140 	call	20814 <lcdWriteBulk>
+        // lcdWrite(CM_RAMWR, CMD);
+		// lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
     }
    20768:	003f3d06 	br	20460 <__alt_data_end+0xfffe0460>
 

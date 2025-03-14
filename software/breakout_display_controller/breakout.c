@@ -87,7 +87,9 @@ uint16_t get_adc_value();
 int main() {
 
 	// create a local frame buffer to hold the dynamic image (each pixel is 16 bits)
-    unsigned short framebuffer[FRAME_SIZE];
+	// ensures efficient memory access by aligining data to 32-bit boundaries
+	__attribute__((aligned(4))) unsigned short framebuffer[FRAME_SIZE];
+
     // paddle x-position
 	uint16_t paddle_x = (LCD_MAX_X + 1 - PADDLE_WIDTH) / 2;
 	uint16_t adc_value = 0;  
@@ -145,6 +147,11 @@ int main() {
 
     // main loop: dynamically update framebuffer
     while(1) {
+
+		// write framebuffer to RAM
+        lcdWrite(CM_RAMWR, CMD);
+		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
+
         // fill framebuffer with background
         for (int x = 0; x <= LCD_MAX_X; x++) {
             for (int y = 0; y <= LCD_MAX_Y; y++) {
@@ -177,9 +184,6 @@ int main() {
             }
         }
 
-        // write framebuffer to RAM
-        lcdWrite(CM_RAMWR, CMD);
-		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
     }
 
 }

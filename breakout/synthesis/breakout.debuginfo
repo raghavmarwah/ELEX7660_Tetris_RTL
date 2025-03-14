@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="breakout" kind="system" version="18.1" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2025.03.14.14:03:35 -->
+ <!-- 2025.03.14.14:26:04 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.EClockAdapter</type>
@@ -53,7 +53,7 @@
  </parameter>
  <parameter name="generationId">
   <type>int</type>
-  <value>1741986202</value>
+  <value>1741987550</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>true</visible>
@@ -6687,7 +6687,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETCLOCK</name>
-   <value>5000000u</value>
+   <value>15000000u</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETSSDELAY</name>
@@ -6791,7 +6791,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="targetClockRate">
    <type>long</type>
-   <value>5000000</value>
+   <value>15000000</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -6826,7 +6826,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="actualClockRate">
    <type>double</type>
-   <value>5000000.0</value>
+   <value>1.25E7</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -14057,5 +14057,5 @@ parameters are a RESULT of the module parameters. -->
   <version>18.1</version>
  </plugin>
  <reportVersion>18.1 625</reportVersion>
- <uniqueIdentifier>581CF89AFB72000001959678095B</uniqueIdentifier>
+ <uniqueIdentifier>581CF89AFB7200000195968C9BC4</uniqueIdentifier>
 </EnsembleReport>

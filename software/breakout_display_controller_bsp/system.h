@@ -4,7 +4,7 @@
  * Machine generated for CPU 'processor' in SOPC Builder design 'breakout'
  * SOPC Builder design path: ../../breakout.sopcinfo
  *
- * Generated: Fri Mar 14 13:05:22 PDT 2025
+ * Generated: Fri Mar 14 14:30:16 PDT 2025
  */
 
 /*
@@ -303,7 +303,7 @@
 #define SPI_0_PREFIX "spi_"
 #define SPI_0_SPAN 32
 #define SPI_0_SYNC_REG_DEPTH 2
-#define SPI_0_TARGETCLOCK 5000000u
+#define SPI_0_TARGETCLOCK 15000000u
 #define SPI_0_TARGETSSDELAY "0.0"
 #define SPI_0_TYPE "altera_avalon_spi"
 

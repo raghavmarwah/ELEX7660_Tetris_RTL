@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="breakout" kind="breakout" version="1.0" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2025.03.14.14:04:21 -->
+ <!-- 2025.03.14.14:26:55 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1741986261</value>
+  <value>1741987615</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -6681,7 +6681,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETCLOCK</name>
-   <value>5000000u</value>
+   <value>15000000u</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETSSDELAY</name>
@@ -6785,7 +6785,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="targetClockRate">
    <type>long</type>
-   <value>5000000</value>
+   <value>15000000</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -6820,7 +6820,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="actualClockRate">
    <type>double</type>
-   <value>5000000.0</value>
+   <value>1.25E7</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>true</visible>
