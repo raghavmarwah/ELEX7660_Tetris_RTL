@@ -1,0 +1,25 @@
+# # File gsaved with Nlview version 6.3.8  2013-12-19 bk=1.2992 VDI=34 GEI=35
+# 
+preplace inst breakout.memory -pg 1 -lvl 3 -y 140
+preplace inst breakout -pg 1 -lvl 1 -y 40 -regy -20
+preplace inst breakout.timer -pg 1 -lvl 3 -y 580
+preplace inst breakout.processor.reset_bridge -pg 1
+preplace inst breakout.processor -pg 1 -lvl 2 -y 520
+preplace inst breakout.spi_0 -pg 1 -lvl 3 -y 340
+preplace inst breakout.pio -pg 1 -lvl 3 -y 470
+preplace inst breakout.jtag_uart -pg 1 -lvl 3 -y 230
+preplace inst breakout.clock -pg 1 -lvl 1 -y 540
+preplace inst breakout.processor.clock_bridge -pg 1
+preplace inst breakout.adcinterface_0 -pg 1 -lvl 3 -y 30
+preplace inst breakout.processor.cpu -pg 1
+preplace netloc FAN_OUT<net_container>breakout</net_container>(SLAVE)processor.reset,(SLAVE)adcinterface_0.reset,(SLAVE)timer.reset,(SLAVE)jtag_uart.reset,(SLAVE)memory.reset1,(SLAVE)pio.reset,(SLAVE)spi_0.reset,(MASTER)clock.clk_reset) 1 1 2 370 670 830
+preplace netloc EXPORT<net_container>breakout</net_container>(SLAVE)breakout.clk,(SLAVE)clock.clk_in) 1 0 1 NJ
+preplace netloc EXPORT<net_container>breakout</net_container>(SLAVE)spi_0.external,(SLAVE)breakout.spi_0_external) 1 0 3 NJ 730 NJ 730 NJ
+preplace netloc EXPORT<net_container>breakout</net_container>(SLAVE)breakout.adcinterface_0_conduit_end,(SLAVE)adcinterface_0.conduit_end) 1 0 3 NJ 80 NJ 80 NJ
+preplace netloc FAN_OUT<net_container>breakout</net_container>(SLAVE)spi_0.clk,(SLAVE)adcinterface_0.clock,(SLAVE)memory.clk1,(SLAVE)pio.clk,(SLAVE)processor.clk,(MASTER)clock.clk,(SLAVE)jtag_uart.clk,(SLAVE)timer.clk) 1 1 2 390 690 810
+preplace netloc EXPORT<net_container>breakout</net_container>(SLAVE)pio.external_connection,(SLAVE)breakout.gpio) 1 0 3 NJ 480 NJ 480 NJ
+preplace netloc FAN_OUT<net_container>breakout</net_container>(SLAVE)spi_0.irq,(MASTER)processor.irq,(SLAVE)jtag_uart.irq,(SLAVE)timer.irq) 1 2 1 850
+preplace netloc INTERCONNECT<net_container>breakout</net_container>(SLAVE)processor.debug_mem_slave,(SLAVE)jtag_uart.avalon_jtag_slave,(SLAVE)adcinterface_0.avalon_slave_0,(SLAVE)timer.s1,(SLAVE)memory.s1,(SLAVE)spi_0.spi_control_port,(SLAVE)pio.s1,(MASTER)processor.data_master,(MASTER)processor.instruction_master) 1 1 2 410 710 770
+preplace netloc EXPORT<net_container>breakout</net_container>(SLAVE)clock.clk_in_reset,(SLAVE)breakout.reset) 1 0 1 NJ
+levelinfo -pg 1 0 170 1060
+levelinfo -hier breakout 180 210 540 900 1050

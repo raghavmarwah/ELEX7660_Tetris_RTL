@@ -6,7 +6,6 @@
 module decode7 (input logic [3:0] num, output logic [7:0] leds);
 
 always_comb
- 
 	case (num)
 		0 : leds = 7'b0111111; // display 0
 		1 : leds = 7'b0000110;	//display 1   

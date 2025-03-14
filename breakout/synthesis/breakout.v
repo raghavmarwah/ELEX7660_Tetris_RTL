@@ -4,13 +4,19 @@
 
 `timescale 1 ps / 1 ps
 module breakout (
-		input  wire       clk_clk,             //            clk.clk
-		output wire [7:0] gpio_export,         //           gpio.export
-		input  wire       reset_reset_n,       //          reset.reset_n
-		input  wire       spi_0_external_MISO, // spi_0_external.MISO
-		output wire       spi_0_external_MOSI, //               .MOSI
-		output wire       spi_0_external_SCLK, //               .SCLK
-		output wire       spi_0_external_SS_n  //               .SS_n
+		output wire        adcinterface_0_conduit_end_adc_convst, // adcinterface_0_conduit_end.adc_convst
+		output wire        adcinterface_0_conduit_end_adc_sck,    //                           .adc_sck
+		output wire        adcinterface_0_conduit_end_adc_sdi,    //                           .adc_sdi
+		input  wire        adcinterface_0_conduit_end_adc_sdo,    //                           .adc_sdo
+		input  wire [2:0]  adcinterface_0_conduit_end_chan,       //                           .chan
+		output wire [11:0] adcinterface_0_conduit_end_result,     //                           .result
+		input  wire        clk_clk,                               //                        clk.clk
+		output wire [7:0]  gpio_export,                           //                       gpio.export
+		input  wire        reset_reset_n,                         //                      reset.reset_n
+		input  wire        spi_0_external_MISO,                   //             spi_0_external.MISO
+		output wire        spi_0_external_MOSI,                   //                           .MOSI
+		output wire        spi_0_external_SCLK,                   //                           .SCLK
+		output wire        spi_0_external_SS_n                    //                           .SS_n
 	);
 
 	wire  [31:0] processor_data_master_readdata;                            // mm_interconnect_0:processor_data_master_readdata -> processor:d_readdata
@@ -32,6 +38,8 @@ module breakout (
 	wire         mm_interconnect_0_jtag_uart_avalon_jtag_slave_read;        // mm_interconnect_0:jtag_uart_avalon_jtag_slave_read -> jtag_uart:av_read_n
 	wire         mm_interconnect_0_jtag_uart_avalon_jtag_slave_write;       // mm_interconnect_0:jtag_uart_avalon_jtag_slave_write -> jtag_uart:av_write_n
 	wire  [31:0] mm_interconnect_0_jtag_uart_avalon_jtag_slave_writedata;   // mm_interconnect_0:jtag_uart_avalon_jtag_slave_writedata -> jtag_uart:av_writedata
+	wire  [31:0] mm_interconnect_0_adcinterface_0_avalon_slave_0_readdata;  // adcinterface_0:avs_readdata -> mm_interconnect_0:adcinterface_0_avalon_slave_0_readdata
+	wire         mm_interconnect_0_adcinterface_0_avalon_slave_0_read;      // mm_interconnect_0:adcinterface_0_avalon_slave_0_read -> adcinterface_0:avs_read
 	wire  [31:0] mm_interconnect_0_processor_debug_mem_slave_readdata;      // processor:debug_mem_slave_readdata -> mm_interconnect_0:processor_debug_mem_slave_readdata
 	wire         mm_interconnect_0_processor_debug_mem_slave_waitrequest;   // processor:debug_mem_slave_waitrequest -> mm_interconnect_0:processor_debug_mem_slave_waitrequest
 	wire         mm_interconnect_0_processor_debug_mem_slave_debugaccess;   // mm_interconnect_0:processor_debug_mem_slave_debugaccess -> processor:debug_mem_slave_debugaccess
@@ -67,8 +75,21 @@ module breakout (
 	wire         irq_mapper_receiver1_irq;                                  // jtag_uart:av_irq -> irq_mapper:receiver1_irq
 	wire         irq_mapper_receiver2_irq;                                  // spi_0:irq -> irq_mapper:receiver2_irq
 	wire  [31:0] processor_irq_irq;                                         // irq_mapper:sender_irq -> processor:irq
-	wire         rst_controller_reset_out_reset;                            // rst_controller:reset_out -> [irq_mapper:reset, jtag_uart:rst_n, memory:reset, mm_interconnect_0:processor_reset_reset_bridge_in_reset_reset, pio:reset_n, processor:reset_n, rst_translator:in_reset, spi_0:reset_n, timer:reset_n]
+	wire         rst_controller_reset_out_reset;                            // rst_controller:reset_out -> [adcinterface_0:reset_n, irq_mapper:reset, jtag_uart:rst_n, memory:reset, mm_interconnect_0:processor_reset_reset_bridge_in_reset_reset, pio:reset_n, processor:reset_n, rst_translator:in_reset, spi_0:reset_n, timer:reset_n]
 	wire         rst_controller_reset_out_reset_req;                        // rst_controller:reset_req -> [memory:reset_req, processor:reset_req, rst_translator:reset_req_in]
+
+	adcinterface adcinterface_0 (
+		.clk          (clk_clk),                                                  //          clock.clk
+		.reset_n      (~rst_controller_reset_out_reset),                          //          reset.reset_n
+		.avs_read     (mm_interconnect_0_adcinterface_0_avalon_slave_0_read),     // avalon_slave_0.read
+		.avs_readdata (mm_interconnect_0_adcinterface_0_avalon_slave_0_readdata), //               .readdata
+		.ADC_CONVST   (adcinterface_0_conduit_end_adc_convst),                    //    conduit_end.adc_convst
+		.ADC_SCK      (adcinterface_0_conduit_end_adc_sck),                       //               .adc_sck
+		.ADC_SDI      (adcinterface_0_conduit_end_adc_sdi),                       //               .adc_sdi
+		.ADC_SDO      (adcinterface_0_conduit_end_adc_sdo),                       //               .adc_sdo
+		.chan         (adcinterface_0_conduit_end_chan),                          //               .chan
+		.result       (adcinterface_0_conduit_end_result)                         //               .result
+	);
 
 	breakout_jtag_uart jtag_uart (
 		.clk            (clk_clk),                                                   //               clk.clk
@@ -179,6 +200,8 @@ module breakout (
 		.processor_instruction_master_waitrequest    (processor_instruction_master_waitrequest),                  //                                      .waitrequest
 		.processor_instruction_master_read           (processor_instruction_master_read),                         //                                      .read
 		.processor_instruction_master_readdata       (processor_instruction_master_readdata),                     //                                      .readdata
+		.adcinterface_0_avalon_slave_0_read          (mm_interconnect_0_adcinterface_0_avalon_slave_0_read),      //         adcinterface_0_avalon_slave_0.read
+		.adcinterface_0_avalon_slave_0_readdata      (mm_interconnect_0_adcinterface_0_avalon_slave_0_readdata),  //                                      .readdata
 		.jtag_uart_avalon_jtag_slave_address         (mm_interconnect_0_jtag_uart_avalon_jtag_slave_address),     //           jtag_uart_avalon_jtag_slave.address
 		.jtag_uart_avalon_jtag_slave_write           (mm_interconnect_0_jtag_uart_avalon_jtag_slave_write),       //                                      .write
 		.jtag_uart_avalon_jtag_slave_read            (mm_interconnect_0_jtag_uart_avalon_jtag_slave_read),        //                                      .read

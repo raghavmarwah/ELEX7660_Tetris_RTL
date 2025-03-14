@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "altera_avalon_spi.h": "c",
+        "system.h": "c",
+        "image.h": "c"
+    }
+}

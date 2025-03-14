@@ -4,7 +4,7 @@
  * Machine generated for CPU 'processor' in SOPC Builder design 'breakout'
  * SOPC Builder design path: ../../breakout.sopcinfo
  *
- * Generated: Thu Mar 13 17:52:05 PDT 2025
+ * Generated: Thu Mar 13 22:48:34 PDT 2025
  */
 
 /*
@@ -133,6 +133,7 @@
  *
  */
 
+#define __ADCINTERFACE
 #define __ALTERA_AVALON_JTAG_UART
 #define __ALTERA_AVALON_ONCHIP_MEMORY2
 #define __ALTERA_AVALON_PIO
@@ -175,6 +176,20 @@
 #define ALT_STDOUT_PRESENT
 #define ALT_STDOUT_TYPE "altera_avalon_jtag_uart"
 #define ALT_SYSTEM_NAME "breakout"
+
+
+/*
+ * adcinterface_0 configuration
+ *
+ */
+
+#define ADCINTERFACE_0_BASE 0x41500
+#define ADCINTERFACE_0_IRQ -1
+#define ADCINTERFACE_0_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define ADCINTERFACE_0_NAME "/dev/adcinterface_0"
+#define ADCINTERFACE_0_SPAN 4
+#define ADCINTERFACE_0_TYPE "adcinterface"
+#define ALT_MODULE_CLASS_adcinterface_0 adcinterface
 
 
 /*

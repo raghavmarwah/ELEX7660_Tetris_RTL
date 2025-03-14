@@ -2,10 +2,10 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>13-Mar-2025 5:52:05 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1741913525395</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>13-Mar-2025 10:48:34 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1741931314192</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\intelFPGA_lite\18.1\ELEX7660_Breakout_FPGA\software\breakout_display_controller_bsp</BspGeneratedLocation>
-        <BspSettingsFile>.\settings.bsp</BspSettingsFile>
+        <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\breakout.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>processor</Cpu>
@@ -927,6 +927,12 @@
                 <addressRange>0x00041050 - 0x00041057</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>adcinterface_0</slaveDescriptor>
+                <addressRange>0x00041500 - 0x00041503</addressRange>
+                <addressSpan>4</addressSpan>
+                <attributes/>
         </MemoryMap>
         <LinkerSection>
                 <sectionName>.text</sectionName>

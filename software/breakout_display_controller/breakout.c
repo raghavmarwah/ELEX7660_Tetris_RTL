@@ -1,9 +1,16 @@
-// breakout.c - initialize ST7735S LCD Controller and fill framebuffer with an image
+// File: breakout.c
+// Author: Raghav Marwah
+// Date: Mar 13, 2025
+// Description: 
 
 #include "image.h"		// image to write to display
 #include "system.h"		// peripheral base addresses
 #include <altera_avalon_spi.h> // function to control altera SPI IP
 #include <unistd.h>     // usleep()
+#include <stdint.h>
+
+// Avalon-MM register with ADC data
+#define ADC_BASE_ADDR ADCINTERFACE_0_BASE
 
 // delays to be used with usleep() in LCD initialization
 #define _10ms (10000)
@@ -63,20 +70,27 @@
 #define LCD_RS  0x01   // LCD Register Select bit (1 for data, 0 for command)
 #define LCD_RST 0x02   // LCD Reset (active low)
 
+// Frame buffer size (each pixel is 16 bits)
+#define FRAME_SIZE ((LCD_MAX_X + 1) * (LCD_MAX_Y + 1))
 
-///////////////////////////////////////////////////////////////////////
-// lcdWrite - Sends a command/data byte to the LCD.
-// Arguments: byte - value to be sent to the LCD
-//            isData - true if byte is data, false if byte is a command
-// Return Value: none
-///////////////////////////////////////////////////////////////////////
+// Paddle parameters
+#define PADDLE_WIDTH 20
+#define PADDLE_HEIGHT 5
+#define PADDLE_Y (LCD_MAX_Y - PADDLE_HEIGHT)  // Paddle drawn near bottom
+
+// additional functions
 void lcdWrite(unsigned char byte, int isData);
+void lcdWriteBulk(uint8_t *data, int len);
+uint16_t get_paddle_x();
 
-int main()
-{
-	int x, y ; // array indices used to access pixel data in image array
+int main() {
 
-	// send controller initialization sequence (deduced from TI Sample Code)
+	// create a local frame buffer to hold the dynamic image (each pixel is 16 bits)
+    unsigned short framebuffer[FRAME_SIZE];
+    // paddle x-position
+	uint8_t paddle_x = 0;  
+
+	// send controller initialization sequence
 	(*(int*)PIO_BASE) &= ~LCD_RST;
 	usleep(_120ms);
 	(*(int*)PIO_BASE) |= LCD_RST;
@@ -101,14 +115,13 @@ int main()
 	usleep(_10ms);
 
 	lcdWrite(CM_MADCTL, CMD);
-	lcdWrite(CM_MADCTL_BGR, DATA);
+	// rotate 90 degrees, mirror vertically, mirror horizontally
+	lcdWrite(CM_MADCTL_MV | CM_MADCTL_MY | CM_MADCTL_MX, DATA);
 
 	lcdWrite(CM_NORON, CMD);
 
     usleep(_10ms);
 	lcdWrite(CM_DISPON, CMD);
-
-	// display image
 
 	// set x range
 	lcdWrite(CM_CASET, CMD);
@@ -127,28 +140,43 @@ int main()
 	// set RAM for writing
     lcdWrite(CM_RAMWR, CMD);
 
-    // fill framebuffer
-    for ( x = IMAGE_WIDTH ; x > 0  ; x-- ) {
-      for ( y = IMAGE_HEIGHT ; y > 0  ; y-- ) {
-    	  // send 16 bits representing the pixel colour: RRRRRGGG_GGGBBBBB
-          lcdWrite(image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL], DATA);
-          lcdWrite(image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1], DATA);
-       }
-	}
-    while(1);
+    // main loop: dynamically update framebuffer
+    while(1) {
+        // fill framebuffer with empty (black) background
+        for (int x = 0; x <= LCD_MAX_X; x++) {
+            for (int y = 0; y <= LCD_MAX_Y; y++) {
+                int index = x * (LCD_MAX_Y + 1) + y;
+                // combine two bytes from the image array into a 16-bit value
+                // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL] << 8)
+                //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1];
+				framebuffer[index] = 0;
+            }
+        }
+
+        // read current paddle position from joystick (ADC)
+        paddle_x = get_paddle_x();
+		//paddle_x += 10;
+
+        // ensure paddle stays within bounds:
+        if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
+            paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
+
+        // draw paddle into the framebuffer
+        for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
+            for (int y = PADDLE_Y; y < PADDLE_Y + PADDLE_HEIGHT; y++) {
+                int index = x * (LCD_MAX_Y + 1) + y;
+                framebuffer[index] = 0xFFFF; // white color
+            }
+        }
+
+        // write framebuffer to RAM
+        lcdWrite(CM_RAMWR, CMD);
+		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
+    }
 }
 
-
-///////////////////////////////////////////////////////////////////////
-// lcdWrite - Sends a command/data byte to the LCD.
-// Arguments: byte - value to be sent to the LCD
-//            isData - true if byte is data, false if byte is a command
-// Return Value: none
-///////////////////////////////////////////////////////////////////////
-void lcdWrite(unsigned char byte, int isData)
-{
+void lcdWrite(unsigned char byte, int isData) {
 	unsigned char data;
-
 	data = byte;
 
     // set/clear register select pin
@@ -159,4 +187,15 @@ void lcdWrite(unsigned char byte, int isData)
 
     // Transmit data/command
 	alt_avalon_spi_command(SPI_0_BASE, 0, 1, &data, 0, NULL, 0) ;
+}
+
+void lcdWriteBulk(uint8_t *data, int len) {
+	(*(int*)PIO_BASE) |= LCD_RS;
+    alt_avalon_spi_command(SPI_0_BASE, 0, len, data, 0, NULL, 0);
+}
+
+// function to get joystick X-axis position
+uint16_t get_paddle_x() {
+	// mask only 12-bit ADC result
+    return (*(volatile uint32_t*) ADC_BASE_ADDR) & 0xFFF;
 }
