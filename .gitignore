@@ -18,7 +18,7 @@ incremental_db/
 simulation/
 testbench/
 timing/
-
+output_files/
 # ignore Quartus II generated files
 *_generation_script*
 *_inst.vhd
@@ -43,7 +43,6 @@ timing/
 *.sopc_builder
 *.summary
 *.tcl
-*.txt # Explicitly add any text files used
 *~
 *example*
 *sopc_*
