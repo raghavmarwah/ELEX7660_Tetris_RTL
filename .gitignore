@@ -19,6 +19,9 @@ simulation/
 testbench/
 timing/
 output_files/
+.vscode/
+.qsys_edit/
+
 # ignore Quartus II generated files
 *_generation_script*
 *_inst.vhd
