@@ -5615,7 +5615,7 @@ alt_exception_cause_generated_bad_addr(alt_exception_cause cause)
    22e68:	d9400015 	stw	r5,0(sp)
    22e6c:	d9800115 	stw	r6,4(sp)
    22e70:	d9c00215 	stw	r7,8(sp)
-   22e74:	00000000 	call	0 <__alt_mem_memory-0x20000>
+   22e74:	00000000 	call	0 <__reset-0x20000>
    22e78:	d9400017 	ldw	r5,0(sp)
    22e7c:	d9800117 	ldw	r6,4(sp)
    22e80:	d9c00217 	ldw	r7,8(sp)
@@ -5699,7 +5699,7 @@ alt_exception_cause_generated_bad_addr(alt_exception_cause cause)
    22fb0:	10003226 	beq	r2,zero,2307c <__call_exitprocs+0x178>
    22fb4:	a009883a 	mov	r4,r20
    22fb8:	98800015 	stw	r2,0(r19)
-   22fbc:	00000000 	call	0 <__alt_mem_memory-0x20000>
+   22fbc:	00000000 	call	0 <__reset-0x20000>
    22fc0:	9d000017 	ldw	r20,0(r19)
    22fc4:	a03fe41e 	bne	r20,zero,22f58 <__alt_data_end+0xfffe2f58>
    22fc8:	dfc00a17 	ldw	ra,40(sp)

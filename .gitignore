@@ -49,7 +49,7 @@ RemoteSystemsTempFiles/
 *.sof
 *.sopc_builder
 *.summary
-*.tcl
+#*.tcl
 *~
 *example*
 *sopc_*

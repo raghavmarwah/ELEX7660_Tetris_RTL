@@ -94,10 +94,9 @@ module adcinterface (
 
     // Avalon-MM read operation
     // send 12-bit ADC result to CPU (upper 20 bits are 0)
-    //assign avs_readdata = {20'd0, result};
     always_ff @(posedge clk) begin
         if (avs_read) begin
-            avs_readdata <= {20'd0, result}; // Update only on read request
+            avs_readdata <= {20'd0, result}; // update only on read request
         end
     end
 
