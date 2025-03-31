@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>14-Mar-2025 5:52:53 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1741999973460</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>30-Mar-2025 9:45:48 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1743396348919</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\intelFPGA_lite\18.1\ELEX7660_Tetris_RTL\software\tetris_display_driver_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\tetris.sopcinfo</SopcDesignFile>
@@ -931,6 +931,12 @@
         <MemoryMap>
                 <slaveDescriptor>adcinterface_0</slaveDescriptor>
                 <addressRange>0x00041500 - 0x00041503</addressRange>
+                <addressSpan>4</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>grid_interface_0</slaveDescriptor>
+                <addressRange>0x00041510 - 0x00041513</addressRange>
                 <addressSpan>4</addressSpan>
                 <attributes/>
         </MemoryMap>

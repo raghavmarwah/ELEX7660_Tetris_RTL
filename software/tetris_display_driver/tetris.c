@@ -10,8 +10,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-// Avalon-MM register with ADC data
+// reading Avalon-MM registers
 #define ADC_BASE_ADDR ADCINTERFACE_0_BASE
+#define GRID_BASE_ADDR 0x41510
 
 // delays to be used with usleep() in LCD initialization
 #define _10ms (10000)
@@ -78,6 +79,8 @@
 #define PADDLE_WIDTH 25
 #define PADDLE_HEIGHT 5
 #define PADDLE_Y (LCD_MAX_Y - PADDLE_HEIGHT)  // Paddle drawn near bottom
+#define BLOCK_SIZE 6
+#define LCD_WIDTH (LCD_MAX_X + 1)  // = 128
 
 // additional functions
 void lcdWrite(unsigned char byte, int isData);
@@ -162,39 +165,50 @@ int main() {
     while(1) {
 
         // fill framebuffer with background
-        for (int x = 0; x <= LCD_MAX_X; x++) {
-            for (int y = 0; y <= LCD_MAX_Y; y++) {
-                int index = y * (LCD_MAX_X + 1) + x;
-                // combine two bytes from the image array into a 16-bit value
-                // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1] << 8)
-                //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL];
-				framebuffer[index] = 0;
-            }
-        }
+//        for (int x = 0; x <= LCD_MAX_X; x++) {
+//            for (int y = 0; y <= LCD_MAX_Y; y++) {
+//                int index = y * (LCD_MAX_X + 1) + x;
+//                // combine two bytes from the image array into a 16-bit value
+//                // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1] << 8)
+//                //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL];
+//				framebuffer[index] = 0;
+//            }
+//        }
 
         // read current paddle position from joystick (ADC)
-        adc_value = get_adc_value();
-		if (adc_value < 1500) {
-			paddle_x -= 10;
+//        adc_value = get_adc_value();
+//		if (adc_value < 1500) {
+//			paddle_x -= 10;
+//		}
+//		else if (adc_value > 1800){
+//			paddle_x += 10;
+//		}
+//
+//        // ensure paddle stays within bounds:
+//        if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
+//            paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
+//
+//        // draw paddle into the framebuffer
+//        for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
+//            for (int y = PADDLE_Y; y < PADDLE_Y + PADDLE_HEIGHT; y++) {
+//                int index = x * (LCD_MAX_Y + 1) + y;
+//                framebuffer[index] = 0xFFFF; // white color
+//            }
+//        }
+//
+//		// write framebuffer to RAM
+//        lcdWrite(CM_RAMWR, CMD);
+//		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
+
+    	for (int y = 0; y < 20; y++) {
+			uint32_t row = *(volatile uint32_t*)(GRID_BASE_ADDR + (y * 4));  // Read from Avalon-MM
+
+			for (int x = 0; x < 10; x++) {
+				framebuffer[y * BLOCK_SIZE * LCD_WIDTH + x * BLOCK_SIZE] =
+					(row & (1 << x)) ? 0xFFFF : 0x0000;  // White block or black background
+			}
 		}
-		else if (adc_value > 1800){
-			paddle_x += 10;
-		}
-
-        // ensure paddle stays within bounds:
-        if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
-            paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
-
-        // draw paddle into the framebuffer
-        for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
-            for (int y = PADDLE_Y; y < PADDLE_Y + PADDLE_HEIGHT; y++) {
-                int index = x * (LCD_MAX_Y + 1) + y;
-                framebuffer[index] = 0xFFFF; // white color
-            }
-        }
-
-		// write framebuffer to RAM
-        lcdWrite(CM_RAMWR, CMD);
+    	lcdWrite(CM_RAMWR, CMD);
 		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
     }
 }
