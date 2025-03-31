@@ -4,7 +4,7 @@
  * Machine generated for CPU 'processor' in SOPC Builder design 'tetris'
  * SOPC Builder design path: ../../tetris.sopcinfo
  *
- * Generated: Sun Mar 30 21:07:09 PDT 2025
+ * Generated: Mon Mar 31 00:16:50 PDT 2025
  */
 
 /*
@@ -184,7 +184,7 @@
  *
  */
 
-#define ADCINTERFACE_0_BASE 0x41500
+#define ADCINTERFACE_0_BASE 0x41520
 #define ADCINTERFACE_0_IRQ -1
 #define ADCINTERFACE_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define ADCINTERFACE_0_NAME "/dev/adcinterface_0"
@@ -199,11 +199,11 @@
  */
 
 #define ALT_MODULE_CLASS_grid_interface_0 grid_interface
-#define GRID_INTERFACE_0_BASE 0x41510
+#define GRID_INTERFACE_0_BASE 0x41580
 #define GRID_INTERFACE_0_IRQ -1
 #define GRID_INTERFACE_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define GRID_INTERFACE_0_NAME "/dev/grid_interface_0"
-#define GRID_INTERFACE_0_SPAN 4
+#define GRID_INTERFACE_0_SPAN 80
 #define GRID_INTERFACE_0_TYPE "grid_interface"
 
 

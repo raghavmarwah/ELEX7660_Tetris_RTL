@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="tetris" kind="tetris" version="1.0" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2025.03.30.21:42:52 -->
+ <!-- 2025.03.31.00:23:57 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1743396172</value>
+  <value>1743405837</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -1128,7 +1128,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="addressSpan">
     <type>java.math.BigInteger</type>
-    <value>4</value>
+    <value>80</value>
     <derived>true</derived>
     <enabled>true</enabled>
     <visible>false</visible>
@@ -1216,7 +1216,7 @@ parameters are a RESULT of the module parameters. -->
    </parameter>
    <parameter name="explicitAddressSpan">
     <type>java.math.BigInteger</type>
-    <value>0</value>
+    <value>80</value>
     <derived>false</derived>
     <enabled>true</enabled>
     <visible>true</visible>
@@ -5487,7 +5487,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="dataSlaveMapParam">
    <type>java.lang.String</type>
-   <value><![CDATA[<address-map><slave name='memory.s1' start='0x20000' end='0x40000' type='altera_avalon_onchip_memory2.s1' /><slave name='processor.debug_mem_slave' start='0x40800' end='0x41000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='spi_0.spi_control_port' start='0x41000' end='0x41020' type='altera_avalon_spi.spi_control_port' /><slave name='timer.s1' start='0x41020' end='0x41040' type='altera_avalon_timer.s1' /><slave name='pio.s1' start='0x41040' end='0x41050' type='altera_avalon_pio.s1' /><slave name='jtag_uart.avalon_jtag_slave' start='0x41050' end='0x41058' type='altera_avalon_jtag_uart.avalon_jtag_slave' /><slave name='adcinterface_0.avalon_slave_0' start='0x41500' end='0x41504' type='adcinterface.avalon_slave_0' /><slave name='grid_interface_0.avalon_slave_0' start='0x41510' end='0x41514' type='grid_interface.avalon_slave_0' /></address-map>]]></value>
+   <value><![CDATA[<address-map><slave name='memory.s1' start='0x20000' end='0x40000' type='altera_avalon_onchip_memory2.s1' /><slave name='processor.debug_mem_slave' start='0x40800' end='0x41000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='spi_0.spi_control_port' start='0x41000' end='0x41020' type='altera_avalon_spi.spi_control_port' /><slave name='timer.s1' start='0x41020' end='0x41040' type='altera_avalon_timer.s1' /><slave name='pio.s1' start='0x41040' end='0x41050' type='altera_avalon_pio.s1' /><slave name='jtag_uart.avalon_jtag_slave' start='0x41050' end='0x41058' type='altera_avalon_jtag_uart.avalon_jtag_slave' /><slave name='adcinterface_0.avalon_slave_0' start='0x41520' end='0x41524' type='adcinterface.avalon_slave_0' /><slave name='grid_interface_0.avalon_slave_0' start='0x41580' end='0x415D0' type='grid_interface.avalon_slave_0' /></address-map>]]></value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -6166,7 +6166,7 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>adcinterface_0</moduleName>
     <slaveName>avalon_slave_0</slaveName>
     <name>adcinterface_0.avalon_slave_0</name>
-    <baseAddress>267520</baseAddress>
+    <baseAddress>267552</baseAddress>
     <span>4</span>
    </memoryBlock>
    <memoryBlock>
@@ -6174,8 +6174,8 @@ parameters are a RESULT of the module parameters. -->
     <moduleName>grid_interface_0</moduleName>
     <slaveName>avalon_slave_0</slaveName>
     <name>grid_interface_0.avalon_slave_0</name>
-    <baseAddress>267536</baseAddress>
-    <span>4</span>
+    <baseAddress>267648</baseAddress>
+    <span>80</span>
    </memoryBlock>
    <memoryBlock>
     <isBridge>false</isBridge>
@@ -8849,7 +8849,7 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <parameter name="baseAddress">
    <type>java.math.BigInteger</type>
-   <value>0x00041500</value>
+   <value>0x00041520</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -8900,7 +8900,7 @@ parameters are a RESULT of the module parameters. -->
   </parameter>
   <parameter name="baseAddress">
    <type>java.math.BigInteger</type>
-   <value>0x00041510</value>
+   <value>0x00041580</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>

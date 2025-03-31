@@ -8,12 +8,12 @@ module tetris (
 	adc_signals_result,
 	clk_clk,
 	gpio_export,
+	grid_interface_grid_state,
 	lcd_signals_MISO,
 	lcd_signals_MOSI,
 	lcd_signals_SCLK,
 	lcd_signals_SS_n,
-	reset_reset_n,
-	grid_interface_grid_state);	
+	reset_reset_n);	
 
 	output		adc_signals_adc_convst;
 	output		adc_signals_adc_sck;
@@ -23,10 +23,10 @@ module tetris (
 	output	[11:0]	adc_signals_result;
 	input		clk_clk;
 	output	[7:0]	gpio_export;
+	input	[199:0]	grid_interface_grid_state;
 	input		lcd_signals_MISO;
 	output		lcd_signals_MOSI;
 	output		lcd_signals_SCLK;
 	output		lcd_signals_SS_n;
 	input		reset_reset_n;
-	input	[199:0]	grid_interface_grid_state;
 endmodule

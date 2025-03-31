@@ -12,7 +12,8 @@
 
 // reading Avalon-MM registers
 #define ADC_BASE_ADDR ADCINTERFACE_0_BASE
-#define GRID_BASE_ADDR 0x41510
+//#define GRID_BASE_ADDR GRID_INTERFACE_0_BASE	// this should work, not sure why it isn't
+#define GRID_BASE_ADDR 0x41580					// for now  hard code the base address
 
 // delays to be used with usleep() in LCD initialization
 #define _10ms (10000)
@@ -75,12 +76,10 @@
 // Frame buffer size (each pixel is 16 bits)
 #define FRAME_SIZE ((LCD_MAX_X + 1) * (LCD_MAX_Y + 1))
 
-// Paddle parameters
-#define PADDLE_WIDTH 25
-#define PADDLE_HEIGHT 5
-#define PADDLE_Y (LCD_MAX_Y - PADDLE_HEIGHT)  // Paddle drawn near bottom
+// Tetris parameters
 #define BLOCK_SIZE 6
-#define LCD_WIDTH (LCD_MAX_X + 1)  // = 128
+#define LCD_WIDTH (LCD_MAX_X + 1)
+#define X_OFFSET ((LCD_WIDTH - (BLOCK_SIZE * 10)) / 2)
 
 // additional functions
 void lcdWrite(unsigned char byte, int isData);
@@ -92,10 +91,6 @@ int main() {
 	// create a local frame buffer to hold the dynamic image (each pixel is 16 bits)
 	// ensures efficient memory access by aligining data to 32-bit boundaries
 	__attribute__((aligned(4))) unsigned short framebuffer[FRAME_SIZE];
-
-    // paddle x-position
-	uint16_t paddle_x = (LCD_MAX_X + 1 - PADDLE_WIDTH) / 2;
-	uint16_t adc_value = 0;  
 
 	// send controller initialization sequence
 	(*(int*)PIO_BASE) &= ~LCD_RST;
@@ -147,7 +142,7 @@ int main() {
 	lcdWrite(CM_NOP, CMD);
     lcdWrite(CM_RAMWR, CMD);
 
-	// test fill framebuffer
+	// splash screen
     for (int x = IMAGE_WIDTH ; x > 0  ; x-- ) {
 		for (int y = IMAGE_HEIGHT ; y > 0  ; y-- ) {
 			// send 16 bits representing the pixel colour: RRRRRGGG_GGGBBBBB
@@ -157,55 +152,34 @@ int main() {
 	}
 	usleep(1000000);
 
+	// black out display
+	for (int x = 0; x <= LCD_MAX_X; x++) {
+		for (int y = 0; y <= LCD_MAX_Y; y++) {
+			int index = y * (LCD_MAX_X + 1) + x;
+			framebuffer[index] = 0;
+		}
+	}
+	lcdWrite(CM_RAMWR, CMD);
+	lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
+
 	lcdWrite(CM_MADCTL, CMD);
-	// rotate 90 degrees, mirror vertically, mirror horizontally
-	lcdWrite(CM_MADCTL_MV | CM_MADCTL_MY | CM_MADCTL_MX | CM_MADCTL_BGR, DATA);
+	// mirror horizontally
+	lcdWrite(CM_MADCTL_MX | CM_MADCTL_BGR, DATA);
 
     // main loop: dynamically update framebuffer
     while(1) {
 
-        // fill framebuffer with background
-//        for (int x = 0; x <= LCD_MAX_X; x++) {
-//            for (int y = 0; y <= LCD_MAX_Y; y++) {
-//                int index = y * (LCD_MAX_X + 1) + x;
-//                // combine two bytes from the image array into a 16-bit value
-//                // framebuffer[index] = (image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL+1] << 8)
-//                //                       | image[(x*IMAGE_HEIGHT+y)*BYTES_PER_PIXEL];
-//				framebuffer[index] = 0;
-//            }
-//        }
-
-        // read current paddle position from joystick (ADC)
-//        adc_value = get_adc_value();
-//		if (adc_value < 1500) {
-//			paddle_x -= 10;
-//		}
-//		else if (adc_value > 1800){
-//			paddle_x += 10;
-//		}
-//
-//        // ensure paddle stays within bounds:
-//        if (paddle_x > (LCD_MAX_X + 1 - PADDLE_WIDTH))
-//            paddle_x = LCD_MAX_X + 1 - PADDLE_WIDTH;
-//
-//        // draw paddle into the framebuffer
-//        for (int x = paddle_x; x < paddle_x + PADDLE_WIDTH; x++) {
-//            for (int y = PADDLE_Y; y < PADDLE_Y + PADDLE_HEIGHT; y++) {
-//                int index = x * (LCD_MAX_Y + 1) + y;
-//                framebuffer[index] = 0xFFFF; // white color
-//            }
-//        }
-//
-//		// write framebuffer to RAM
-//        lcdWrite(CM_RAMWR, CMD);
-//		lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
-
     	for (int y = 0; y < 20; y++) {
-			uint32_t row = *(volatile uint32_t*)(GRID_BASE_ADDR + (y * 4));  // Read from Avalon-MM
+			uint32_t row = *(volatile uint32_t*)(GRID_BASE_ADDR + (y * 4));
 
 			for (int x = 0; x < 10; x++) {
-				framebuffer[y * BLOCK_SIZE * LCD_WIDTH + x * BLOCK_SIZE] =
-					(row & (1 << x)) ? 0xFFFF : 0x0000;  // White block or black background
+				for (int dx = 0; dx < BLOCK_SIZE; dx++) {
+					for (int dy = 0; dy < BLOCK_SIZE; dy++) {
+						int px = X_OFFSET + x * BLOCK_SIZE + dx;
+						int py = y * BLOCK_SIZE + dy;
+						framebuffer[py * LCD_WIDTH + px] = (row & (1 << x)) ? 0xFFFF : 0x0000;
+					}
+				}				
 			}
 		}
     	lcdWrite(CM_RAMWR, CMD);

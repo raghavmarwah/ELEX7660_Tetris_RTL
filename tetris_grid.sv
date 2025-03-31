@@ -14,7 +14,7 @@ module tetris_grid (
     output logic row_cleared,               // high when a row is cleared
     output logic game_over                  // high when game ends
 );
-    // 2D register grid (flattened into 1D)
+    // 2D register grid
     logic [9:0] grid [19:0];
 
     // tetromino position

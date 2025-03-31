@@ -23,6 +23,7 @@ module tetris_top (
 
     // Avalon-MM Interface Signals
     logic avs_read;
+    logic [4:0] avs_address;
     logic [31:0] avs_readdata;
 
     logic [7:0]  gpio;              // gpio signal from processor
@@ -90,6 +91,7 @@ module tetris_top (
 
 	// turn off the RGB LED on the BoosterPack
 	//assign {red, green, blue} = '0;
+    assign blue = '0;
 
     // divide clock and generate a 2-bit digit counter to determine which digit to display
 	always_ff @(posedge FPGA_CLK1_50) 
@@ -111,13 +113,13 @@ module tetris_top (
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd1750) begin
+        if (adc_value > 'd2000) begin           // 1750
             move_right <= 1'b1;
             move_left <= 1'b0;
             red <= 1'b1;
             green <= 1'b0;
         end
-        else if (adc_value < 'd1550) begin
+        else if (adc_value < 'd1300) begin      // 1550
             move_right <= 1'b0;
             move_left <= 1'b1;
             green <= 1'b1;
@@ -126,7 +128,7 @@ module tetris_top (
         else begin
             move_right <= 1'b0;
             move_left <= 1'b0;
-            {red, green, blue} <= '0;
+            {red, green} <= '0;
         end
     end
 

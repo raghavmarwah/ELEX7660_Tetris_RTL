@@ -8,6 +8,7 @@ module grid_interface (
     input logic [199:0] grid_state,     // 200 bits for 10x20 grid
     // Avalon-MM Interface
     input  logic avs_read,              // read signal from CPU
+    input  logic [4:0] avs_address,     // address from CPU
     output logic [31:0] avs_readdata    // data to CPU
 );
 
@@ -18,4 +19,11 @@ module grid_interface (
         if (avs_read)
             avs_readdata <= {22'd0, grid_state[199:190]}; 
     end
+    // always_ff @(posedge clk) begin
+    //     if (avs_read && avs_address < 20)
+    //         avs_readdata <= {22'd0, grid_state[avs_address * 10 +: 10]};
+    //     else
+    //         avs_readdata <= 32'd0;
+    // end
+
 endmodule
