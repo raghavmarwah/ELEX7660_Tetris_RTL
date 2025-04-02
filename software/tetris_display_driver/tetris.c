@@ -80,6 +80,7 @@
 #define BLOCK_SIZE 6
 #define LCD_WIDTH (LCD_MAX_X + 1)
 #define X_OFFSET ((LCD_WIDTH - (BLOCK_SIZE * 10)) / 2)
+#define Y_OFFSET 8
 
 // additional functions
 void lcdWrite(unsigned char byte, int isData);
@@ -163,8 +164,8 @@ int main() {
 	lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
 
 	lcdWrite(CM_MADCTL, CMD);
-	// mirror screen vertically
-	lcdWrite(CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
+	// mirror screen vertically and horizontally
+	lcdWrite(CM_MADCTL_MX | CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
 
     // main loop: dynamically update framebuffer
     while(1) {
@@ -176,7 +177,7 @@ int main() {
 				for (int dx = 0; dx < BLOCK_SIZE; dx++) {
 					for (int dy = 0; dy < BLOCK_SIZE; dy++) {
 						int px = X_OFFSET + x * BLOCK_SIZE + dx;
-						int py = y * BLOCK_SIZE + dy;
+						int py = Y_OFFSET + y * BLOCK_SIZE + dy;
 						framebuffer[py * LCD_WIDTH + px] = (row & (1 << x)) ? 0xFFFF : 0x0000;
 					}
 				}				

@@ -33,7 +33,7 @@ module tetris_grid (
         end
         else begin
             counter <= counter + 1;
-            tick <= (counter == 26'd48_000_000);
+            tick <= (counter == 26'd40_000_000);
             if (tick) counter <= 0;
         end
     end
@@ -67,14 +67,20 @@ module tetris_grid (
             tetromino_x         <= 4'd4;
             tetromino_y         <= 5'd0;
         end
-        // move the piece down
         else if (falling && tick) begin
+            // check if the piece can move down
+            // if it can't, lock it in place
             if (tetromino_y == 19 || grid[tetromino_y + 1][tetromino_x]) begin
                 grid[tetromino_y][tetromino_x] <= 1'b1;
                 falling <= 1'b0;  // lock piece and allow next to spawn
             end else begin
                 tetromino_y <= tetromino_y + 1'd1;
             end
+            // move left/right based on ADC value
+            if (move_left && tetromino_x > 0)
+                tetromino_x <= tetromino_x - 1;
+            else if (move_right && tetromino_x < 9)
+                tetromino_x <= tetromino_x + 1;
         end
     end
 

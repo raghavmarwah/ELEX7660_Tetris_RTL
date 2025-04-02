@@ -1102,10 +1102,10 @@ int main() {
    206a8:	000b883a 	mov	r5,zero
    206ac:	01000d84 	movi	r4,54
    206b0:	002095c0 	call	2095c <lcdWrite>
-	// mirror screen vertically
-	lcdWrite(CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
+	// mirror screen vertically and horizontally
+	lcdWrite(CM_MADCTL_MX | CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
    206b4:	01400044 	movi	r5,1
-   206b8:	01002204 	movi	r4,136
+   206b8:	01003204 	movi	r4,200
    206bc:	002095c0 	call	2095c <lcdWrite>
 
     // main loop: dynamically update framebuffer
@@ -1168,14 +1168,14 @@ int main() {
    2077c:	295ffe04 	addi	r5,r5,32760
    20780:	2f0b883a 	add	r5,r5,fp
    20784:	28800015 	stw	r2,0(r5)
-						int py = y * BLOCK_SIZE + dy;
+						int py = Y_OFFSET + y * BLOCK_SIZE + dy;
    20788:	01400184 	movi	r5,6
    2078c:	00bffff4 	movhi	r2,65535
    20790:	109ff804 	addi	r2,r2,32736
    20794:	1705883a 	add	r2,r2,fp
    20798:	11000017 	ldw	r4,0(r2)
    2079c:	0020aa40 	call	20aa4 <__mulsi3>
-   207a0:	1007883a 	mov	r3,r2
+   207a0:	10c00204 	addi	r3,r2,8
    207a4:	013ffff4 	movhi	r4,65535
    207a8:	211ffb04 	addi	r4,r4,32748
    207ac:	2709883a 	add	r4,r4,fp
@@ -1282,7 +1282,7 @@ int main() {
    208f4:	20800017 	ldw	r2,0(r4)
    208f8:	10800290 	cmplti	r2,r2,10
    208fc:	103f881e 	bne	r2,zero,20720 <__alt_data_end+0xfffe0720>
-	lcdWrite(CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
+	lcdWrite(CM_MADCTL_MX | CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
 
     // main loop: dynamically update framebuffer
     while(1) {
