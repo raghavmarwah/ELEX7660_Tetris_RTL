@@ -163,8 +163,8 @@ int main() {
 	lcdWriteBulk((uint8_t*)framebuffer, FRAME_SIZE * 2);
 
 	lcdWrite(CM_MADCTL, CMD);
-	// mirror horizontally
-	lcdWrite(CM_MADCTL_MX | CM_MADCTL_BGR, DATA);
+	// mirror screen vertically
+	lcdWrite(CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
 
     // main loop: dynamically update framebuffer
     while(1) {

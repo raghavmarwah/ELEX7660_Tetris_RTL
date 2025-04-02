@@ -15,59 +15,95 @@ module tetris_grid (
     output logic game_over                  // high when game ends
 );
     // 2D register grid
-    logic [9:0] grid [19:0];
+    logic [9:0] grid [19:0];    // main game grid
+    logic [9:0] shadow [19:0];  // holds the currently falling tetromino bits
 
     // tetromino position
-    logic [3:0] tetromino_x, tetromino_y;
+    logic [3:0] tetromino_x;    // column (0–9) 
+    logic [4:0] tetromino_y;    // row (0–19)
+    logic falling;
+
+    // tick counter (clock divider)
+    logic [25:0] counter;
+    logic tick;
+    always_ff @(posedge clk, negedge reset_n) begin
+        if (!reset_n) begin
+            counter <= 0;
+            tick    <= 0;
+        end
+        else begin
+            counter <= counter + 1;
+            tick <= (counter == 26'd48_000_000);
+            if (tick) counter <= 0;
+        end
+    end
+
+    // draw current tetromino into the shadow grid
+    always_comb begin
+        // clear shadow grid
+        for (int y = 0; y < 20; y++) begin
+            shadow[y] = 10'd0;
+        end
+        // draw 1x1 block at tetromino position
+        if (tetromino_y < 20 && tetromino_x < 10) begin
+            shadow[tetromino_y][tetromino_x] = 1'b1;
+        end
+    end
+
     
     // update logic (move & rotate)
     always_ff @(posedge clk, negedge reset_n) begin
         if (!reset_n) begin
-            tetromino_x <= 4'd4;
-            tetromino_y <= 4'd0;
+            falling <= 1'b0;
+            // clear main grid
+            for (int y = 0; y < 20; y++) begin
+                grid[y] = 10'd0;
+            end
         end
-        else begin
-            if (move_left && tetromino_x > 0) tetromino_x <= tetromino_x - 1;
-            if (move_right && tetromino_x < 9) tetromino_x <= tetromino_x + 1;
-            if (move_down) tetromino_y <= tetromino_y + 1;
-            
-            // Rotation Logic can be added here
+        else if (!falling) begin
+            // spawn a new piece
+            falling             <= 1'b1;
+            //active_tetromino    <= 4'd0;
+            tetromino_x         <= 4'd4;
+            tetromino_y         <= 5'd0;
+        end
+        // move the piece down
+        else if (falling && tick) begin
+            if (tetromino_y == 19 || grid[tetromino_y + 1][tetromino_x]) begin
+                grid[tetromino_y][tetromino_x] <= 1'b1;
+                falling <= 1'b0;  // lock piece and allow next to spawn
+            end else begin
+                tetromino_y <= tetromino_y + 1'd1;
+            end
         end
     end
 
     // Collision detection, piece locking, and row clearing logic here...
 
     // row clearing logic
-    always_ff @(posedge clk) begin
-        for (int y = 19; y > 0; y--) begin
-            // if all 10 bits in a row are 1s
-            if (&grid[y]) begin
-                for (int j = y; j > 0; j--) begin
-                    grid[j] <= grid[j-1]; // shift rows down
-                end
-                grid[0] <= 10'b0; // clear the top row
-                row_cleared <= 1'b1;
-            end
-            else begin
-                row_cleared <= 1'b0;
-            end
-        end
-    end
+    // always_ff @(posedge clk) begin
+    //     for (int y = 19; y > 0; y--) begin
+    //         // if all 10 bits in a row are 1s
+    //         if (&grid[y]) begin
+    //             for (int j = y; j > 0; j--) begin
+    //                 grid[j] <= grid[j-1]; // shift rows down
+    //             end
+    //             grid[0] <= 10'b0; // clear the top row
+    //             row_cleared <= 1'b1;
+    //         end
+    //         else begin
+    //             row_cleared <= 1'b0;
+    //         end
+    //     end
+    // end
 
     // flatten grid into a 1D output for easy readout by the CPU
     // memory-mapped interfaces deal with vectors (1D arrays), not nested 2D arrays
     genvar r, c;
-    // generate
-    //     for (r = 0; r < 20; r++) begin : row_loop
-    //         for (c = 0; c < 10; c++) begin : col_loop
-    //             assign grid_state[r*10 + c] = grid[r][c];
-    //         end
-    //     end
-    // endgenerate
     generate
         for (r = 0; r < 20; r++) begin : row_loop
             for (c = 0; c < 10; c++) begin : col_loop
-                assign grid_state[r*10 + c] = 'b1;
+                assign grid_state[r*10 + c] = grid[r][c] | shadow[r][c];
             end
         end
     endgenerate

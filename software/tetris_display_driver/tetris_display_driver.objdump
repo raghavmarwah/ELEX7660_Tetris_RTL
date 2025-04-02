@@ -71,7 +71,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  26 .jdi          00004c36  00000000  00000000  000212ff  2**0
                   CONTENTS, READONLY
- 27 .sopcinfo     00048221  00000000  00000000  00025f35  2**0
+ 27 .sopcinfo     000482ad  00000000  00000000  00025f35  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00020000 l    d  .entry	00000000 .entry
@@ -1102,10 +1102,10 @@ int main() {
    206a8:	000b883a 	mov	r5,zero
    206ac:	01000d84 	movi	r4,54
    206b0:	002095c0 	call	2095c <lcdWrite>
-	// mirror horizontally
-	lcdWrite(CM_MADCTL_MX | CM_MADCTL_BGR, DATA);
+	// mirror screen vertically
+	lcdWrite(CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
    206b4:	01400044 	movi	r5,1
-   206b8:	01001204 	movi	r4,72
+   206b8:	01002204 	movi	r4,136
    206bc:	002095c0 	call	2095c <lcdWrite>
 
     // main loop: dynamically update framebuffer
@@ -1282,7 +1282,7 @@ int main() {
    208f4:	20800017 	ldw	r2,0(r4)
    208f8:	10800290 	cmplti	r2,r2,10
    208fc:	103f881e 	bne	r2,zero,20720 <__alt_data_end+0xfffe0720>
-	lcdWrite(CM_MADCTL_MX | CM_MADCTL_BGR, DATA);
+	lcdWrite(CM_MADCTL_MY | CM_MADCTL_BGR, DATA);
 
     // main loop: dynamically update framebuffer
     while(1) {

@@ -113,13 +113,13 @@ module tetris_top (
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd2200) begin           // 1750
+        if (adc_value > 'd2300) begin           // 1750
             move_right <= 1'b1;
             move_left <= 1'b0;
             red <= 1'b1;
             green <= 1'b0;
         end
-        else if (adc_value < 'd1100) begin      // 1550
+        else if (adc_value < 'd1000) begin      // 1550
             move_right <= 1'b0;
             move_left <= 1'b1;
             green <= 1'b1;
