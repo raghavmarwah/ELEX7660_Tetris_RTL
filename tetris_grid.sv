@@ -14,14 +14,25 @@ module tetris_grid (
     output logic row_cleared,               // high when a row is cleared
     output logic game_over                  // high when game ends
 );
-    // 2D register grid
+    // state machine for game logic
+    typedef enum logic [2:0] {
+        idle,
+        spawn,
+        falling,
+        lock,
+        clear_rows,
+        check_gameover,
+        gameover
+    } game_state_t;
+    game_state_t state;
+    
+    // game register grids
     logic [9:0] grid [19:0];    // main game grid
     logic [9:0] shadow [19:0];  // holds the currently falling tetromino bits
 
     // tetromino position
     logic [3:0] tetromino_x;    // column (0–9) 
     logic [4:0] tetromino_y;    // row (0–19)
-    logic falling;
 
     // tick counter (clock divider)
     logic [25:0] counter;
@@ -41,6 +52,17 @@ module tetris_grid (
     // set the counter value based on move_down signal
     assign counter_set_value = (move_down) ? 26'd8_000_000 : 26'd40_000_000;
 
+    // flatten grid into a 1D output for easy readout by the CPU
+    // memory-mapped interfaces deal with vectors (1D arrays), not nested 2D arrays
+    genvar r, c;
+    generate
+        for (r = 0; r < 20; r++) begin : row_loop
+            for (c = 0; c < 10; c++) begin : col_loop
+                assign grid_state[r*10 + c] = grid[r][c] | shadow[r][c];
+            end
+        end
+    endgenerate
+
     // draw current tetromino into the shadow grid
     always_comb begin
         // clear shadow grid
@@ -53,71 +75,96 @@ module tetris_grid (
         end
     end
 
-    
-    // update logic (move & rotate)
+    // state machine for game logic
     always_ff @(posedge clk, negedge reset_n) begin
         if (!reset_n) begin
-            falling <= 1'b0;
+            state <= idle;
+            tetromino_x <= 4'd4;
+            tetromino_y <= 5'd0;
             // clear main grid
             for (int y = 0; y < 20; y++) begin
                 grid[y] = 10'd0;
             end
-        end
-        else if (!falling) begin
-            // spawn a new piece
-            falling             <= 1'b1;
-            //active_tetromino    <= 4'd0;
-            tetromino_x         <= 4'd4;
-            tetromino_y         <= 5'd0;
-        end
-        else if (falling && tick) begin
-            // check if the piece can move down
-            // if it can't, lock it in place
-            if (tetromino_y == 19 || grid[tetromino_y + 1][tetromino_x]) begin
-                // copy shadow to grid
-                for (int y = 0; y < 20; y++) begin
-                    for (int x = 0; x < 10; x++) begin
-                        if (shadow[y][x])
-                            grid[y][x] <= 1'b1;
-                    end
-                end
-                falling <= 1'b0;  // lock piece and allow next to spawn
+        end 
+        else begin
+            case (state)
 
-                // row clearing logic
-                for (int y = 19; y >= 0; y--) begin
-                    // if all 10 bits in the row are 1s
-                    if (&grid[y]) begin
-                        // shift all rows above down
-                        for (int j = y; j > 0; j--) begin
-                            grid[j] <= grid[j-1];
+                idle: begin
+                    state <= spawn;
+                end
+
+                // spawn a new piece
+                spawn: begin
+                    tetromino_x <= 4'd4;
+                    tetromino_y <= 5'd0;
+                    if (grid[0][4])
+                        state <= gameover;
+                    else
+                        state <= falling;
+                end
+
+                falling: begin
+                    // gravity tick
+                    if (tick) begin
+                        // check if the piece can move down
+                        // if it can't, lock it in place
+                        if (tetromino_y == 19 || grid[tetromino_y + 1][tetromino_x])
+                            state <= lock;
+                        else begin
+                            // move left/right based on ADC value
+                            if (move_left && tetromino_x > 0)
+                                tetromino_x <= tetromino_x - 1;
+                            else if (move_right && tetromino_x < 9)
+                                tetromino_x <= tetromino_x + 1;
+                                // move down
+                            tetromino_y <= tetromino_y + 1;
                         end
-                        // clear the top row
-                        grid[0] <= 10'd0;
-
-                        // Optionally: update score or drop multiple rows
-                        // Optionally: decrement y to re-check same row after shift
                     end
                 end
-            end else begin
-                tetromino_y <= tetromino_y + 1'd1;
-            end
-            // move left/right based on ADC value
-            if (move_left && tetromino_x > 0)
-                tetromino_x <= tetromino_x - 1;
-            else if (move_right && tetromino_x < 9)
-                tetromino_x <= tetromino_x + 1;
+
+                lock: begin
+                    // copy shadow to grid
+                    for (int y = 0; y < 20; y++) begin
+                        for (int x = 0; x < 10; x++) begin
+                            if (shadow[y][x])
+                                grid[y][x] <= 1'b1;
+                        end
+                    end
+                    state <= clear_rows;
+                end
+
+                clear_rows: begin
+                    // row clearing logic
+                    for (int y = 19; y >= 0; y--) begin
+                        // if all 10 bits in the row are 1s
+                        if (&grid[y]) begin
+                            // shift all rows above down
+                            for (int j = y; j > 0; j--) begin
+                                grid[j] <= grid[j-1];
+                            end
+                            // clear the top row
+                            grid[0] <= 10'd0;
+
+                            // Optionally: update score or drop multiple rows
+                            // Optionally: decrement y to re-check same row after shift
+                        end
+                    end
+                    state <= check_gameover;
+                end
+
+                check_gameover: begin
+                    if (grid[0][4])
+                        state <= gameover;
+                    else
+                        state <= spawn;
+                end
+
+                gameover: begin
+                    // hold in game over
+                end
+
+            endcase
         end
     end
-
-    // flatten grid into a 1D output for easy readout by the CPU
-    // memory-mapped interfaces deal with vectors (1D arrays), not nested 2D arrays
-    genvar r, c;
-    generate
-        for (r = 0; r < 20; r++) begin : row_loop
-            for (c = 0; c < 10; c++) begin : col_loop
-                assign grid_state[r*10 + c] = grid[r][c] | shadow[r][c];
-            end
-        end
-    endgenerate
 
 endmodule
