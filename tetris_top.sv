@@ -35,7 +35,6 @@ module tetris_top (
     logic [2:0]  channel_val;       // 3-bit selected channel
 
     logic [199:0] grid_state;       // 200 bits for 10x20 grid
-    logic [3:0] active_tetromino;   // 4-bit tetromino ID
     logic row_cleared;              // high when a row is cleared
     logic game_over;                // high when game ends
 
@@ -77,7 +76,6 @@ module tetris_top (
         .move_right         (move_right),
         .move_down          (move_down),
         .rotate             (rotate),
-        .active_tetromino   (active_tetromino),
         .grid_state         (grid_state),
         .row_cleared        (row_cleared),
         .game_over          (game_over)
@@ -113,13 +111,13 @@ module tetris_top (
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd2300) begin           // 1750
+        if (adc_value > 'd1900) begin           // 1750
             move_right <= 1'b1;
             move_left <= 1'b0;
             red <= 1'b1;
             green <= 1'b0;
         end
-        else if (adc_value < 'd1000) begin      // 1550
+        else if (adc_value < 'd1400) begin      // 1550
             move_right <= 1'b0;
             move_left <= 1'b1;
             green <= 1'b1;
@@ -134,7 +132,7 @@ module tetris_top (
 
     // reset game when S1 and S2 are pressed
     assign reset_game = s1 || s2;
-    assign rotate = s1;
+    assign rotate = !s1;
     assign move_down = !s2;
 
 endmodule

@@ -9,7 +9,6 @@ module tetris_grid (
     input  logic move_right,                // move right signal
     input  logic move_down,                 // move down signal
     input  logic rotate,                    // rotate signal
-    input  logic [3:0] active_tetromino,    // 4-bit tetromino ID
     output logic [199:0] grid_state,        // 200 bits for 10x20 grid
     output logic row_cleared,               // high when a row is cleared
     output logic game_over                  // high when game ends
@@ -25,6 +24,65 @@ module tetris_grid (
         gameover
     } game_state_t;
     game_state_t state;
+
+    // tetromino type and rotation
+    logic [2:0] tetromino_type;
+    logic [1:0] rotation;
+    logic [15:0] shape;
+    logic rotate_prev, rotate_pressed;
+    // tetromino shapes return function
+    // 16 bits for each tetromino, 4 rotations
+    function automatic logic [15:0] get_tetromino(input logic [2:0] t_type, input logic [1:0] rot);
+        case (t_type)
+            // O
+            3'd0: get_tetromino = 16'b0000011001100000;
+            // I
+            3'd1: case (rot)
+                2'd0: get_tetromino = 16'b0000111100000000;
+                2'd1: get_tetromino = 16'b0010001000100010;
+                2'd2: get_tetromino = 16'b0000000011110000;
+                2'd3: get_tetromino = 16'b0100010001000100;
+            endcase
+            // T
+            3'd2: case (rot)
+                2'd0: get_tetromino = 16'b0000011100100000;
+                2'd1: get_tetromino = 16'b0000010001100100;
+                2'd2: get_tetromino = 16'b0000001001110000;
+                2'd3: get_tetromino = 16'b0000010011000100;
+            endcase
+            // L
+            3'd3: case (rot)
+                2'd0: get_tetromino = 16'b0000010001110000;
+                2'd1: get_tetromino = 16'b0000011000100010;
+                2'd2: get_tetromino = 16'b0000000001110001;
+                2'd3: get_tetromino = 16'b0000010001000110;
+            endcase
+            // J
+            3'd4: case (rot)
+                2'd0: get_tetromino = 16'b0000001001110000;
+                2'd1: get_tetromino = 16'b0000010001000110;
+                2'd2: get_tetromino = 16'b0000000001110010;
+                2'd3: get_tetromino = 16'b0000011000100010;
+            endcase
+            // S
+            3'd5: case (rot)
+                2'd0, 2'd2: get_tetromino = 16'b0000011000110000;
+                2'd1, 2'd3: get_tetromino = 16'b0000001001100100;
+            endcase
+            // Z
+            3'd6: case (rot)
+                2'd0, 2'd2: get_tetromino = 16'b0000001101100000;
+                2'd1, 2'd3: get_tetromino = 16'b0000010001100010;
+            endcase
+            default: get_tetromino = 16'd0;
+        endcase
+    endfunction
+    assign shape = get_tetromino(tetromino_type, rotation);
+    // avoid multiple rotations
+    always_ff @(posedge clk) begin
+        rotate_prev <= rotate;
+    end
+    assign rotate_pressed = rotate && !rotate_prev;
     
     // game register grids
     logic [9:0] grid [19:0];    // main game grid
@@ -69,9 +127,18 @@ module tetris_grid (
         for (int y = 0; y < 20; y++) begin
             shadow[y] = 10'd0;
         end
-        // draw 1x1 block at tetromino position
-        if (tetromino_y < 20 && tetromino_x < 10) begin
-            shadow[tetromino_y][tetromino_x] = 1'b1;
+        // draw the tetromino shape into the shadow grid
+        // tetromino_x and tetromino_y are the top-left corner of the tetromino
+        for (int row = 0; row < 4; row++) begin
+            for (int col = 0; col < 4; col++) begin
+                if (shape[15 - (row * 4 + col)]) begin
+                    int gx, gy;
+                    gx = tetromino_x + col;
+                    gy = tetromino_y + row;
+                    if (gx >= 0 && gx < 10 && gy >= 0 && gy < 20)
+                        shadow[gy][gx] = 1'b1;
+                end
+            end
         end
     end
 
@@ -97,6 +164,8 @@ module tetris_grid (
                 spawn: begin
                     tetromino_x <= 4'd4;
                     tetromino_y <= 5'd0;
+                    tetromino_type <= 3'd2; // test example, T piece
+                    rotation <= 2'd0;
                     if (grid[0][4])
                         state <= gameover;
                     else
@@ -120,6 +189,9 @@ module tetris_grid (
                             tetromino_y <= tetromino_y + 1;
                         end
                     end
+                    // rotate piece by updating the rotation index value
+                    if (rotate_pressed) rotation <= (rotation + 1) % 4;
+
                 end
 
                 lock: begin
