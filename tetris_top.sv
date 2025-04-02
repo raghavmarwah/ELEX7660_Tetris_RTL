@@ -135,6 +135,6 @@ module tetris_top (
     // reset game when S1 and S2 are pressed
     assign reset_game = s1 || s2;
     assign rotate = s1;
-    assign move_down = s2;
+    assign move_down = !s2;
 
 endmodule
