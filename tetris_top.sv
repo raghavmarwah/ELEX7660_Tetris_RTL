@@ -23,7 +23,7 @@ module tetris_top (
 
     // Avalon-MM Interface Signals
     logic avs_read;
-    logic [4:0] avs_address;
+    logic [4:0] avalon_slave_0_address;
     logic [31:0] avs_readdata;
 
     logic [7:0]  gpio;              // gpio signal from processor
@@ -113,13 +113,13 @@ module tetris_top (
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd2000) begin           // 1750
+        if (adc_value > 'd2200) begin           // 1750
             move_right <= 1'b1;
             move_left <= 1'b0;
             red <= 1'b1;
             green <= 1'b0;
         end
-        else if (adc_value < 'd1300) begin      // 1550
+        else if (adc_value < 'd1100) begin      // 1550
             move_right <= 1'b0;
             move_left <= 1'b1;
             green <= 1'b1;

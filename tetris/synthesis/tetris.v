@@ -42,6 +42,7 @@ module tetris (
 	wire  [31:0] mm_interconnect_0_adcinterface_0_avalon_slave_0_readdata;   // adcinterface_0:avs_readdata -> mm_interconnect_0:adcinterface_0_avalon_slave_0_readdata
 	wire         mm_interconnect_0_adcinterface_0_avalon_slave_0_read;       // mm_interconnect_0:adcinterface_0_avalon_slave_0_read -> adcinterface_0:avs_read
 	wire  [31:0] mm_interconnect_0_grid_interface_0_avalon_slave_0_readdata; // grid_interface_0:avs_readdata -> mm_interconnect_0:grid_interface_0_avalon_slave_0_readdata
+	wire   [4:0] mm_interconnect_0_grid_interface_0_avalon_slave_0_address;  // mm_interconnect_0:grid_interface_0_avalon_slave_0_address -> grid_interface_0:avalon_slave_0_address
 	wire         mm_interconnect_0_grid_interface_0_avalon_slave_0_read;     // mm_interconnect_0:grid_interface_0_avalon_slave_0_read -> grid_interface_0:avs_read
 	wire  [31:0] mm_interconnect_0_processor_debug_mem_slave_readdata;       // processor:debug_mem_slave_readdata -> mm_interconnect_0:processor_debug_mem_slave_readdata
 	wire         mm_interconnect_0_processor_debug_mem_slave_waitrequest;    // processor:debug_mem_slave_waitrequest -> mm_interconnect_0:processor_debug_mem_slave_waitrequest
@@ -95,11 +96,12 @@ module tetris (
 	);
 
 	grid_interface grid_interface_0 (
-		.clk          (clk_clk),                                                    //          clock.clk
-		.reset_n      (~rst_controller_reset_out_reset),                            //          reset.reset_n
-		.avs_read     (mm_interconnect_0_grid_interface_0_avalon_slave_0_read),     // avalon_slave_0.read
-		.avs_readdata (mm_interconnect_0_grid_interface_0_avalon_slave_0_readdata), //               .readdata
-		.grid_state   (grid_interface_grid_state)                                   //    conduit_end.grid_state
+		.clk                    (clk_clk),                                                    //          clock.clk
+		.reset_n                (~rst_controller_reset_out_reset),                            //          reset.reset_n
+		.avs_read               (mm_interconnect_0_grid_interface_0_avalon_slave_0_read),     // avalon_slave_0.read
+		.avs_readdata           (mm_interconnect_0_grid_interface_0_avalon_slave_0_readdata), //               .readdata
+		.avalon_slave_0_address (mm_interconnect_0_grid_interface_0_avalon_slave_0_address),  //               .address
+		.grid_state             (grid_interface_grid_state)                                   //    conduit_end.grid_state
 	);
 
 	tetris_jtag_uart jtag_uart (
@@ -213,7 +215,8 @@ module tetris (
 		.processor_instruction_master_readdata       (processor_instruction_master_readdata),                      //                                      .readdata
 		.adcinterface_0_avalon_slave_0_read          (mm_interconnect_0_adcinterface_0_avalon_slave_0_read),       //         adcinterface_0_avalon_slave_0.read
 		.adcinterface_0_avalon_slave_0_readdata      (mm_interconnect_0_adcinterface_0_avalon_slave_0_readdata),   //                                      .readdata
-		.grid_interface_0_avalon_slave_0_read        (mm_interconnect_0_grid_interface_0_avalon_slave_0_read),     //       grid_interface_0_avalon_slave_0.read
+		.grid_interface_0_avalon_slave_0_address     (mm_interconnect_0_grid_interface_0_avalon_slave_0_address),  //       grid_interface_0_avalon_slave_0.address
+		.grid_interface_0_avalon_slave_0_read        (mm_interconnect_0_grid_interface_0_avalon_slave_0_read),     //                                      .read
 		.grid_interface_0_avalon_slave_0_readdata    (mm_interconnect_0_grid_interface_0_avalon_slave_0_readdata), //                                      .readdata
 		.jtag_uart_avalon_jtag_slave_address         (mm_interconnect_0_jtag_uart_avalon_jtag_slave_address),      //           jtag_uart_avalon_jtag_slave.address
 		.jtag_uart_avalon_jtag_slave_write           (mm_interconnect_0_jtag_uart_avalon_jtag_slave_write),        //                                      .write

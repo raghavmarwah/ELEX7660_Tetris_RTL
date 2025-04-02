@@ -141,13 +141,13 @@ module tetris_mm_interconnect_0_router
     localparam PAD4 = log2ceil(64'h41050 - 64'h41040); 
     localparam PAD5 = log2ceil(64'h41058 - 64'h41050); 
     localparam PAD6 = log2ceil(64'h41524 - 64'h41520); 
-    localparam PAD7 = log2ceil(64'h41584 - 64'h41580); 
+    localparam PAD7 = log2ceil(64'h41600 - 64'h41580); 
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
     // address range of the slaves. If the required width is too
     // large or too small, we use the address field width instead.
     // -------------------------------------------------------
-    localparam ADDR_RANGE = 64'h41584;
+    localparam ADDR_RANGE = 64'h41600;
     localparam RANGE_ADDR_WIDTH = log2ceil(ADDR_RANGE);
     localparam OPTIMIZED_ADDR_H = (RANGE_ADDR_WIDTH > PKT_ADDR_W) ||
                                   (RANGE_ADDR_WIDTH == 0) ?
@@ -242,7 +242,7 @@ module tetris_mm_interconnect_0_router
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 0;
     end
 
-    // ( 0x41580 .. 0x41584 )
+    // ( 0x41580 .. 0x41600 )
     if ( {address[RG:PAD7],{PAD7{1'b0}}} == 19'h41580  && read_transaction  ) begin
             src_channel = 8'b00000100;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;

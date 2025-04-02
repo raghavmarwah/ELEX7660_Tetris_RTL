@@ -18,7 +18,6 @@ module adcinterface (
     output logic ADC_SDI,      	    // serial data in (to ADC)
     // Avalon-MM Interface
     input  logic avs_read,              // read signal from CPU
-    input  logic [4:0] avs_address,     // address from CPU
     output logic [31:0] avs_readdata    // data to CPU
 );
 

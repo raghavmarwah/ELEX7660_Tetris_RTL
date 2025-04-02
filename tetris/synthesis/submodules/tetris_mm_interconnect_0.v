@@ -23,7 +23,8 @@ module tetris_mm_interconnect_0 (
 		output wire [31:0] processor_instruction_master_readdata,       //                                      .readdata
 		output wire        adcinterface_0_avalon_slave_0_read,          //         adcinterface_0_avalon_slave_0.read
 		input  wire [31:0] adcinterface_0_avalon_slave_0_readdata,      //                                      .readdata
-		output wire        grid_interface_0_avalon_slave_0_read,        //       grid_interface_0_avalon_slave_0.read
+		output wire [4:0]  grid_interface_0_avalon_slave_0_address,     //       grid_interface_0_avalon_slave_0.address
+		output wire        grid_interface_0_avalon_slave_0_read,        //                                      .read
 		input  wire [31:0] grid_interface_0_avalon_slave_0_readdata,    //                                      .readdata
 		output wire [0:0]  jtag_uart_avalon_jtag_slave_address,         //           jtag_uart_avalon_jtag_slave.address
 		output wire        jtag_uart_avalon_jtag_slave_write,           //                                      .write
@@ -851,7 +852,7 @@ module tetris_mm_interconnect_0 (
 	);
 
 	altera_merlin_slave_translator #(
-		.AV_ADDRESS_W                   (1),
+		.AV_ADDRESS_W                   (5),
 		.AV_DATA_W                      (32),
 		.UAV_DATA_W                     (32),
 		.AV_BURSTCOUNT_W                (1),
@@ -890,9 +891,9 @@ module tetris_mm_interconnect_0 (
 		.uav_writedata          (grid_interface_0_avalon_slave_0_agent_m0_writedata),     //                         .writedata
 		.uav_lock               (grid_interface_0_avalon_slave_0_agent_m0_lock),          //                         .lock
 		.uav_debugaccess        (grid_interface_0_avalon_slave_0_agent_m0_debugaccess),   //                         .debugaccess
-		.av_read                (grid_interface_0_avalon_slave_0_read),                   //      avalon_anti_slave_0.read
+		.av_address             (grid_interface_0_avalon_slave_0_address),                //      avalon_anti_slave_0.address
+		.av_read                (grid_interface_0_avalon_slave_0_read),                   //                         .read
 		.av_readdata            (grid_interface_0_avalon_slave_0_readdata),               //                         .readdata
-		.av_address             (),                                                       //              (terminated)
 		.av_write               (),                                                       //              (terminated)
 		.av_writedata           (),                                                       //              (terminated)
 		.av_begintransfer       (),                                                       //              (terminated)
