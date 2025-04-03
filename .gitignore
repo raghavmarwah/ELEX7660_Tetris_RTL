@@ -24,6 +24,8 @@ output_files/
 
 # ignore Eclipse generated folders
 .metadata/
+.settings/
+obj/
 RemoteSystemsTempFiles/
 
 # ignore Quartus II generated files

@@ -23,6 +23,7 @@ always_comb
 		13: leds = 7'b0111111;	//display D
 		14: leds = 7'b1111001;	//display E
 		15: leds = 7'b1110001;	//display F
+		default: leds = 7'b0000000; // display nothing
 	endcase
 
 endmodule

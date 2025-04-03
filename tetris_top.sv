@@ -35,6 +35,7 @@ module tetris_top (
     logic [2:0]  channel_val;       // 3-bit selected channel
 
     logic [199:0] grid_state;       // 200 bits for 10x20 grid
+    logic [13:0] score;             // score value
     logic row_cleared;              // high when a row is cleared
     logic game_over;                // high when game ends
 
@@ -44,6 +45,11 @@ module tetris_top (
     logic rotate;                   // rotate signal
     logic reset_game;               // reset game signal
 
+    logic [3:0] bcd0;
+    logic [3:0] bcd1;
+    logic [3:0] bcd2;
+    logic [3:0] bcd3;               // BCD digits from bin14_to_bcd4
+
     // instantiate modules
     decode2 decode2_0 (
         .digit (digit),
@@ -52,6 +58,13 @@ module tetris_top (
 	decode7 decode7_0 (
         .num  (disp_digit),
         .leds (leds)
+    );
+    bin14_to_bcd4 bin14_to_bcd4_0 (
+        .bin  (score),
+        .bcd3 (bcd3),
+        .bcd2 (bcd2),
+        .bcd1 (bcd1),
+        .bcd0 (bcd0)
     );
     tetris tetris_0 (
 	    .clk_clk                    (FPGA_CLK1_50),
@@ -70,15 +83,16 @@ module tetris_top (
         .grid_interface_grid_state  (grid_state)
 	);
     tetris_grid tetris_grid_0 (
-        .clk                (FPGA_CLK1_50),
-        .reset_n            (reset_game),
-        .move_left          (move_left),
-        .move_right         (move_right),
-        .move_down          (move_down),
-        .rotate             (rotate),
-        .grid_state         (grid_state),
-        .row_cleared        (row_cleared),
-        .game_over          (game_over)
+        .clk            (FPGA_CLK1_50),
+        .reset_n        (reset_game),
+        .move_left      (move_left),
+        .move_right     (move_right),
+        .move_down      (move_down),
+        .rotate         (rotate),
+        .row_cleared    (row_cleared),
+        .game_over      (game_over),
+        .grid_state     (grid_state),
+        .score          (score)
     );
  	
     // control the display data/command (lcd_rs) with gpio[0] from processor
@@ -100,24 +114,23 @@ module tetris_top (
 
     // 7-segment LED display multiplexing
     always_comb begin
-    //    case(digit)
-    //         2'b00: disp_digit = adc_value[3:0];
-    //         2'b01: disp_digit = adc_value[7:4];
-    //         2'b10: disp_digit = adc_value[11:8];
-	// 	    2'b11: disp_digit = {1'b0, channel_val};
-	// 		default: disp_digit = 4'd0; // default case to prevent any problems
-	// 	endcase
-        disp_digit = '0;
+        case (digit)
+            2'd0: disp_digit = bcd0;  // rightmost digit
+            2'd1: disp_digit = bcd1;
+            2'd2: disp_digit = bcd2;
+            2'd3: disp_digit = bcd3;  // leftmost digit
+            default: disp_digit = 4'd0;
+        endcase
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd2100) begin           // 1750
+        if (adc_value > 'd1750) begin           // 1750
             move_right <= 1'b1;
             move_left <= 1'b0;
             red <= 1'b1;
             green <= 1'b0;
         end
-        else if (adc_value < 'd1200) begin      // 1550
+        else if (adc_value < 'd1550) begin      // 1550
             move_right <= 1'b0;
             move_left <= 1'b1;
             green <= 1'b1;

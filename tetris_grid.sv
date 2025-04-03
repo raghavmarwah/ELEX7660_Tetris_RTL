@@ -9,9 +9,10 @@ module tetris_grid (
     input  logic move_right,            // move right signal
     input  logic move_down,             // move down signal
     input  logic rotate,                // rotate signal
-    output logic [199:0] grid_state,    // 200 bits for 10x20 grid
     output logic row_cleared,           // high when a row is cleared
-    output logic game_over              // high when game ends
+    output logic game_over,             // high when game ends
+    output logic [199:0] grid_state,    // 200 bits for 10x20 grid
+    output logic [13:0] score           // score output
 );
     // state machine for game logic
     typedef enum logic [2:0] {
@@ -20,6 +21,7 @@ module tetris_grid (
         falling,
         lock,
         clear_rows,
+        update_score,
         check_gameover,
         gameover
     } game_state_t;
@@ -28,6 +30,7 @@ module tetris_grid (
     // tetromino type and rotation
     logic [2:0] tetromino_type;
     logic [1:0] rotation;
+    logic [1:0] next_rotation;
     logic [15:0] shape;
     logic rotate_prev, rotate_pressed;
     // tetromino shapes return function
@@ -126,6 +129,10 @@ module tetris_grid (
         end
     endgenerate
 
+    // score register
+    logic [13:0] score_reg;
+    assign score = score_reg;
+
     // draw current tetromino into the shadow grid
     always_comb begin
         // clear shadow grid
@@ -148,18 +155,21 @@ module tetris_grid (
     end
 
     // lfsr for pseudo-random tetromino generation
-    logic [2:0] lfsr = 3'b001;  // non-zero seed
-    logic [2:0] next_type;
-    always_ff @(posedge clk or negedge reset_n) begin
+    logic [4:0] lfsr = 5'b00001;  // non-zero seed
+    logic [2:0] next_tetromino_type;
+    logic [2:0] last_tetromino_type;
+    always_ff @(posedge clk, negedge reset_n) begin
         if (!reset_n)
-            lfsr <= 3'b001;
+            lfsr <= 5'b00001;
         else begin
-            // taps for 3-bit LFSR: x^3 + x + 1
-            lfsr <= {lfsr[1] ^ lfsr[0], lfsr[2:1]};
+            // x^5 + x^3 + 1 (common taps)
+            lfsr <= {lfsr[3] ^ lfsr[0], lfsr[4:1]};
         end
     end
-    // ensure output is in 0–6 range
-    assign next_type = lfsr % 7;
+    assign next_tetromino_type = lfsr[2:0] % 7;
+    assign next_rotation = lfsr[4:3] % 4;
+
+    logic row_cleared_this_frame;
 
     // state machine for game logic
     always_ff @(posedge clk, negedge reset_n) begin
@@ -167,8 +177,10 @@ module tetris_grid (
             state <= idle;
             tetromino_x <= 4'd3;
             tetromino_y <= 5'd0;
-            tetromino_type <= next_type;
+            tetromino_type <= next_tetromino_type;
             rotation <= 2'd0;
+            score_reg <= 14'd0;
+            row_cleared_this_frame <= 0;
             // clear main grid
             for (int y = 0; y < 20; y++) begin
                 grid[y] = 10'd0;
@@ -185,8 +197,15 @@ module tetris_grid (
                 spawn: begin
                     tetromino_x <= 4'd3;
                     tetromino_y <= 5'd0;
-                    tetromino_type <= next_type;
+                    // generate a new tetromino type
+                    if (next_tetromino_type == last_tetromino_type)
+                        tetromino_type <= (next_tetromino_type + 3'd1) % 7;
+                    else
+                        tetromino_type <= next_tetromino_type;
+                    last_tetromino_type <= tetromino_type;
+                    rotation <= next_rotation;
                     rotation <= 2'd0;
+                    row_cleared_this_frame <= 0;
                     if (check_collision(shape, 4, 0))
                         state <= gameover;
                     else
@@ -237,10 +256,21 @@ module tetris_grid (
                             end
                             // clear the top row
                             grid[0] <= 10'd0;
+                            // set row_cleared_this_frame signal
+                            row_cleared_this_frame <= 1;
 
                             // Optionally: update score or drop multiple rows
                             // Optionally: decrement y to re-check same row after shift
                         end
+                    end
+                    // increment score if a row was cleared
+                    state <= update_score;
+                end
+
+                update_score: begin
+                    if (row_cleared_this_frame) begin
+                        score_reg <= (score_reg + 10 > 9999) ? 9999 : score_reg + 10;
+                        row_cleared_this_frame <= 0;
                     end
                     state <= check_gameover;
                 end
