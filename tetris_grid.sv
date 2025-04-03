@@ -35,49 +35,49 @@ module tetris_grid (
     function automatic logic [15:0] get_tetromino(input logic [2:0] t_type, input logic [1:0] rot);
         case (t_type)
             // O
-            3'd0: get_tetromino = 16'b1100110000000000;
+            3'd0: get_tetromino = 16'b1100_1100_0000_0000;
             // I
             3'd1: case (rot)
-                2'd0: get_tetromino = 16'b1111000000000000;
-                2'd1: get_tetromino = 16'b1000100010001000;
-                2'd2: get_tetromino = 16'b0000000011110000;
-                2'd3: get_tetromino = 16'b0001000100010001;
+                2'd0: get_tetromino = 16'b1111_0000_0000_0000;
+                2'd1: get_tetromino = 16'b1000_1000_1000_1000;
+                2'd2: get_tetromino = 16'b1111_0000_0000_0000;
+                2'd3: get_tetromino = 16'b0001_0001_0001_0001;
             endcase
 
             // T
             3'd2: case (rot)
-                2'd0: get_tetromino = 16'b1110010000000000;
-                2'd1: get_tetromino = 16'b0100110001000000;
-                2'd2: get_tetromino = 16'b0100111000000000;
-                2'd3: get_tetromino = 16'b0100011001000000;
+                2'd0: get_tetromino = 16'b1110_0100_0000_0000;
+                2'd1: get_tetromino = 16'b0100_1100_0100_0000;
+                2'd2: get_tetromino = 16'b0100_1110_0000_0000;
+                2'd3: get_tetromino = 16'b0100_0110_0100_0000;
             endcase
 
             // L
             3'd3: case (rot)
-                2'd0: get_tetromino = 16'b1000111000000000;
-                2'd1: get_tetromino = 16'b0110010001000000;
-                2'd2: get_tetromino = 16'b0000111000100000;
-                2'd3: get_tetromino = 16'b0100010011000000;
+                2'd0: get_tetromino = 16'b1000_1110_0000_0000;
+                2'd1: get_tetromino = 16'b0110_0100_0100_0000;
+                2'd2: get_tetromino = 16'b0000_1110_0010_0000;
+                2'd3: get_tetromino = 16'b0100_0100_1100_0000;
             endcase
 
             // J
             3'd4: case (rot)
-                2'd0: get_tetromino = 16'b0010111000000000;
-                2'd1: get_tetromino = 16'b0100010001100000;
-                2'd2: get_tetromino = 16'b0000111001000000;
-                2'd3: get_tetromino = 16'b0110001000100000;
+                2'd0: get_tetromino = 16'b0010_1110_0000_0000;
+                2'd1: get_tetromino = 16'b0100_0100_0110_0000;
+                2'd2: get_tetromino = 16'b0000_1110_1000_0000;
+                2'd3: get_tetromino = 16'b0110_0010_0010_0000;
             endcase
 
             // S
             3'd5: case (rot)
-                2'd0, 2'd2: get_tetromino = 16'b0110110000000000;
-                2'd1, 2'd3: get_tetromino = 16'b0100110010000000;
+                2'd0, 2'd2: get_tetromino = 16'b0110_1100_0000_0000;
+                2'd1, 2'd3: get_tetromino = 16'b1000_1100_0100_0000;
             endcase
 
             // Z
             3'd6: case (rot)
-                2'd0, 2'd2: get_tetromino = 16'b1100011000000000;
-                2'd1, 2'd3: get_tetromino = 16'b0010011000100000;
+                2'd0, 2'd2: get_tetromino = 16'b1100_0110_0000_0000;
+                2'd1, 2'd3: get_tetromino = 16'b0100_1100_1000_0000;
             endcase
             default: get_tetromino = 16'd0;
         endcase
@@ -147,13 +147,27 @@ module tetris_grid (
         end
     end
 
+    // lfsr for pseudo-random tetromino generation
+    logic [2:0] lfsr = 3'b001;  // non-zero seed
+    logic [2:0] next_type;
+    always_ff @(posedge clk or negedge reset_n) begin
+        if (!reset_n)
+            lfsr <= 3'b001;
+        else begin
+            // taps for 3-bit LFSR: x^3 + x + 1
+            lfsr <= {lfsr[1] ^ lfsr[0], lfsr[2:1]};
+        end
+    end
+    // ensure output is in 0–6 range
+    assign next_type = lfsr % 7;
+
     // state machine for game logic
     always_ff @(posedge clk, negedge reset_n) begin
         if (!reset_n) begin
             state <= idle;
             tetromino_x <= 4'd3;
             tetromino_y <= 5'd0;
-            tetromino_type <= 3'd0;
+            tetromino_type <= next_type;
             rotation <= 2'd0;
             // clear main grid
             for (int y = 0; y < 20; y++) begin
@@ -171,7 +185,7 @@ module tetris_grid (
                 spawn: begin
                     tetromino_x <= 4'd3;
                     tetromino_y <= 5'd0;
-                    tetromino_type <= (tetromino_type + 1) % 7; // cycle through tetromino types
+                    tetromino_type <= next_type;
                     rotation <= 2'd0;
                     if (check_collision(shape, 4, 0))
                         state <= gameover;
