@@ -169,7 +169,14 @@ int main() {
 
     // main loop: dynamically update framebuffer
     while(1) {
-
+		
+		// fill entire screen with blue background first
+		for (int y = 0; y <= LCD_MAX_Y; y++) {
+			for (int x = 0; x <= LCD_MAX_X; x++) {
+				framebuffer[y * LCD_WIDTH + x] = 0x078D;
+			}
+		}
+		// draw Tetris grid on top of background
     	for (int y = 0; y < 20; y++) {
 			uint32_t row = *(volatile uint32_t*)(GRID_BASE_ADDR + (y * 4));
 

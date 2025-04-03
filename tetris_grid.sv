@@ -4,14 +4,14 @@
 // Description:
 
 module tetris_grid (
-    input  logic clk, reset_n,              // clock and reset
-    input  logic move_left,                 // move left signal
-    input  logic move_right,                // move right signal
-    input  logic move_down,                 // move down signal
-    input  logic rotate,                    // rotate signal
-    output logic [199:0] grid_state,        // 200 bits for 10x20 grid
-    output logic row_cleared,               // high when a row is cleared
-    output logic game_over                  // high when game ends
+    input  logic clk, reset_n,          // clock and reset
+    input  logic move_left,             // move left signal
+    input  logic move_right,            // move right signal
+    input  logic move_down,             // move down signal
+    input  logic rotate,                // rotate signal
+    output logic [199:0] grid_state,    // 200 bits for 10x20 grid
+    output logic row_cleared,           // high when a row is cleared
+    output logic game_over              // high when game ends
 );
     // state machine for game logic
     typedef enum logic [2:0] {
@@ -35,44 +35,49 @@ module tetris_grid (
     function automatic logic [15:0] get_tetromino(input logic [2:0] t_type, input logic [1:0] rot);
         case (t_type)
             // O
-            3'd0: get_tetromino = 16'b0000011001100000;
+            3'd0: get_tetromino = 16'b1100110000000000;
             // I
             3'd1: case (rot)
-                2'd0: get_tetromino = 16'b0000111100000000;
-                2'd1: get_tetromino = 16'b0010001000100010;
+                2'd0: get_tetromino = 16'b1111000000000000;
+                2'd1: get_tetromino = 16'b1000100010001000;
                 2'd2: get_tetromino = 16'b0000000011110000;
-                2'd3: get_tetromino = 16'b0100010001000100;
+                2'd3: get_tetromino = 16'b0001000100010001;
             endcase
+
             // T
             3'd2: case (rot)
-                2'd0: get_tetromino = 16'b0000011100100000;
-                2'd1: get_tetromino = 16'b0000010001100100;
-                2'd2: get_tetromino = 16'b0000001001110000;
-                2'd3: get_tetromino = 16'b0000010011000100;
+                2'd0: get_tetromino = 16'b1110010000000000;
+                2'd1: get_tetromino = 16'b0100110001000000;
+                2'd2: get_tetromino = 16'b0100111000000000;
+                2'd3: get_tetromino = 16'b0100011001000000;
             endcase
+
             // L
             3'd3: case (rot)
-                2'd0: get_tetromino = 16'b0000010001110000;
-                2'd1: get_tetromino = 16'b0000011000100010;
-                2'd2: get_tetromino = 16'b0000000001110001;
-                2'd3: get_tetromino = 16'b0000010001000110;
+                2'd0: get_tetromino = 16'b1000111000000000;
+                2'd1: get_tetromino = 16'b0110010001000000;
+                2'd2: get_tetromino = 16'b0000111000100000;
+                2'd3: get_tetromino = 16'b0100010011000000;
             endcase
+
             // J
             3'd4: case (rot)
-                2'd0: get_tetromino = 16'b0000001001110000;
-                2'd1: get_tetromino = 16'b0000010001000110;
-                2'd2: get_tetromino = 16'b0000000001110010;
-                2'd3: get_tetromino = 16'b0000011000100010;
+                2'd0: get_tetromino = 16'b0010111000000000;
+                2'd1: get_tetromino = 16'b0100010001100000;
+                2'd2: get_tetromino = 16'b0000111001000000;
+                2'd3: get_tetromino = 16'b0110001000100000;
             endcase
+
             // S
             3'd5: case (rot)
-                2'd0, 2'd2: get_tetromino = 16'b0000011000110000;
-                2'd1, 2'd3: get_tetromino = 16'b0000001001100100;
+                2'd0, 2'd2: get_tetromino = 16'b0110110000000000;
+                2'd1, 2'd3: get_tetromino = 16'b0100110010000000;
             endcase
+
             // Z
             3'd6: case (rot)
-                2'd0, 2'd2: get_tetromino = 16'b0000001101100000;
-                2'd1, 2'd3: get_tetromino = 16'b0000010001100010;
+                2'd0, 2'd2: get_tetromino = 16'b1100011000000000;
+                2'd1, 2'd3: get_tetromino = 16'b0010011000100000;
             endcase
             default: get_tetromino = 16'd0;
         endcase
@@ -146,8 +151,10 @@ module tetris_grid (
     always_ff @(posedge clk, negedge reset_n) begin
         if (!reset_n) begin
             state <= idle;
-            tetromino_x <= 4'd4;
+            tetromino_x <= 4'd3;
             tetromino_y <= 5'd0;
+            tetromino_type <= 3'd0;
+            rotation <= 2'd0;
             // clear main grid
             for (int y = 0; y < 20; y++) begin
                 grid[y] = 10'd0;
@@ -162,11 +169,11 @@ module tetris_grid (
 
                 // spawn a new piece
                 spawn: begin
-                    tetromino_x <= 4'd4;
+                    tetromino_x <= 4'd3;
                     tetromino_y <= 5'd0;
-                    tetromino_type <= 3'd2; // test example, T piece
+                    tetromino_type <= (tetromino_type + 1) % 7; // cycle through tetromino types
                     rotation <= 2'd0;
-                    if (grid[0][4])
+                    if (check_collision(shape, 4, 0))
                         state <= gameover;
                     else
                         state <= falling;
@@ -177,13 +184,13 @@ module tetris_grid (
                     if (tick) begin
                         // check if the piece can move down
                         // if it can't, lock it in place
-                        if (check_collision_down(shape, tetromino_x, tetromino_y))
+                        if (check_collision(shape, tetromino_x, tetromino_y + 1))
                             state <= lock;
                         else begin
                             // move left/right based on ADC value
-                            if (move_left && !check_collision_left(shape, tetromino_x, tetromino_y))
+                            if (move_left && !check_collision(shape, tetromino_x - 1, tetromino_y))
                                 tetromino_x <= tetromino_x - 1;
-                            else if (move_right && !check_collision_right(shape, tetromino_x, tetromino_y))
+                            else if (move_right && !check_collision(shape, tetromino_x + 1, tetromino_y))
                                 tetromino_x <= tetromino_x + 1;
                             // move down
                             tetromino_y <= tetromino_y + 1;
@@ -239,69 +246,25 @@ module tetris_grid (
         end
     end
 
-    // check if the tetromino collides with the grid or base
-    function automatic logic check_collision_down(
+    // collision check function
+    function automatic logic check_collision(
         input logic [15:0] shape,
         input logic [3:0] x,
         input logic [4:0] y
     );
-        logic collision;
-        collision = 0;
-
+        logic collision = 0;
         for (int row = 0; row < 4; row++) begin
             for (int col = 0; col < 4; col++) begin
-                if (shape[15 - (row * 4 + col)]) begin
+                int bit_index = 15 - (row * 4 + col);
+                if (shape[bit_index]) begin
                     int gx = x + col;
                     int gy = y + row;
 
-                    if (gy + 1 >= 20) begin
+                    if (gx < 0 || gx >= 10 || gy < 0 || gy >= 20) begin
                         collision = 1;
-                    end else if (gx >= 0 && gx < 10 && gy >= 0 && gy < 20) begin
-                        if (grid[gy + 1][gx])
-                            collision = 1;
+                    end else if (grid[gy][gx]) begin
+                        collision = 1;
                     end
-                end
-            end
-        end
-        return collision;
-    endfunction
-
-    // check if the tetromino collides with the left wall or other pieces
-    function automatic logic check_collision_left(
-        input logic [15:0] shape,
-        input logic [3:0] x,
-        input logic [4:0] y
-    );
-        logic collision = 0;
-
-        for (int row = 0; row < 4; row++) begin
-            for (int col = 0; col < 4; col++) begin
-                if (shape[15 - (row * 4 + col)]) begin
-                    int gx = x + col;
-                    int gy = y + row;
-                    if (gx - 1 < 0 || (gy >= 0 && gy < 20 && grid[gy][gx - 1]))
-                        collision = 1;
-                end
-            end
-        end
-        return collision;
-    endfunction
-
-    // check if the tetromino collides with the right wall or other pieces
-    function automatic logic check_collision_right(
-        input logic [15:0] shape,
-        input logic [3:0] x,
-        input logic [4:0] y
-    );
-        logic collision = 0;
-
-        for (int row = 0; row < 4; row++) begin
-            for (int col = 0; col < 4; col++) begin
-                if (shape[15 - (row * 4 + col)]) begin
-                    int gx = x + col;
-                    int gy = y + row;
-                    if (gx + 1 >= 10 || (gy >= 0 && gy < 20 && grid[gy][gx + 1]))
-                        collision = 1;
                 end
             end
         end
