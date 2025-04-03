@@ -52,23 +52,23 @@ module tetris_grid (
                 2'd0: get_tetromino = 16'b1110_0100_0000_0000;
                 2'd1: get_tetromino = 16'b0100_1100_0100_0000;
                 2'd2: get_tetromino = 16'b0100_1110_0000_0000;
-                2'd3: get_tetromino = 16'b0100_0110_0100_0000;
-            endcase
-
-            // L
-            3'd3: case (rot)
-                2'd0: get_tetromino = 16'b1000_1110_0000_0000;
-                2'd1: get_tetromino = 16'b0110_0100_0100_0000;
-                2'd2: get_tetromino = 16'b0000_1110_0010_0000;
-                2'd3: get_tetromino = 16'b0100_0100_1100_0000;
+                2'd3: get_tetromino = 16'b1000_1100_1000_0000;
             endcase
 
             // J
+            3'd3: case (rot)
+                2'd0: get_tetromino = 16'b1000_1110_0000_0000;
+                2'd1: get_tetromino = 16'b1100_1000_1000_0000;
+                2'd2: get_tetromino = 16'b1110_0010_0000_0000;
+                2'd3: get_tetromino = 16'b0100_0100_1100_0000;
+            endcase
+
+            // L
             3'd4: case (rot)
                 2'd0: get_tetromino = 16'b0010_1110_0000_0000;
-                2'd1: get_tetromino = 16'b0100_0100_0110_0000;
-                2'd2: get_tetromino = 16'b0000_1110_1000_0000;
-                2'd3: get_tetromino = 16'b0110_0010_0010_0000;
+                2'd1: get_tetromino = 16'b1000_1000_1100_0000;
+                2'd2: get_tetromino = 16'b1110_1000_0000_0000;
+                2'd3: get_tetromino = 16'b1100_0100_0100_0000;
             endcase
 
             // S
