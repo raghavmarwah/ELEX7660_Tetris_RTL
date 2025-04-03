@@ -177,15 +177,15 @@ module tetris_grid (
                     if (tick) begin
                         // check if the piece can move down
                         // if it can't, lock it in place
-                        if (tetromino_y == 19 || grid[tetromino_y + 1][tetromino_x])
+                        if (check_collision_down(shape, tetromino_x, tetromino_y))
                             state <= lock;
                         else begin
                             // move left/right based on ADC value
-                            if (move_left && tetromino_x > 0)
+                            if (move_left && !check_collision_left(shape, tetromino_x, tetromino_y))
                                 tetromino_x <= tetromino_x - 1;
-                            else if (move_right && tetromino_x < 9)
+                            else if (move_right && !check_collision_right(shape, tetromino_x, tetromino_y))
                                 tetromino_x <= tetromino_x + 1;
-                                // move down
+                            // move down
                             tetromino_y <= tetromino_y + 1;
                         end
                     end
@@ -238,5 +238,74 @@ module tetris_grid (
             endcase
         end
     end
+
+    // check if the tetromino collides with the grid or base
+    function automatic logic check_collision_down(
+        input logic [15:0] shape,
+        input logic [3:0] x,
+        input logic [4:0] y
+    );
+        logic collision;
+        collision = 0;
+
+        for (int row = 0; row < 4; row++) begin
+            for (int col = 0; col < 4; col++) begin
+                if (shape[15 - (row * 4 + col)]) begin
+                    int gx = x + col;
+                    int gy = y + row;
+
+                    if (gy + 1 >= 20) begin
+                        collision = 1;
+                    end else if (gx >= 0 && gx < 10 && gy >= 0 && gy < 20) begin
+                        if (grid[gy + 1][gx])
+                            collision = 1;
+                    end
+                end
+            end
+        end
+        return collision;
+    endfunction
+
+    // check if the tetromino collides with the left wall or other pieces
+    function automatic logic check_collision_left(
+        input logic [15:0] shape,
+        input logic [3:0] x,
+        input logic [4:0] y
+    );
+        logic collision = 0;
+
+        for (int row = 0; row < 4; row++) begin
+            for (int col = 0; col < 4; col++) begin
+                if (shape[15 - (row * 4 + col)]) begin
+                    int gx = x + col;
+                    int gy = y + row;
+                    if (gx - 1 < 0 || (gy >= 0 && gy < 20 && grid[gy][gx - 1]))
+                        collision = 1;
+                end
+            end
+        end
+        return collision;
+    endfunction
+
+    // check if the tetromino collides with the right wall or other pieces
+    function automatic logic check_collision_right(
+        input logic [15:0] shape,
+        input logic [3:0] x,
+        input logic [4:0] y
+    );
+        logic collision = 0;
+
+        for (int row = 0; row < 4; row++) begin
+            for (int col = 0; col < 4; col++) begin
+                if (shape[15 - (row * 4 + col)]) begin
+                    int gx = x + col;
+                    int gy = y + row;
+                    if (gx + 1 >= 10 || (gy >= 0 && gy < 20 && grid[gy][gx + 1]))
+                        collision = 1;
+                end
+            end
+        end
+        return collision;
+    endfunction
 
 endmodule
