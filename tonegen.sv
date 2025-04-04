@@ -3,11 +3,9 @@
 // Date: Apr 03, 2025
 // Description: A tone generator module that plays a melody when the game is over.
 //              The melody is defined in the module using frequency and duration values
-//              for each note. The melody consists of 11 notes, with a rest note in between.
-//              The melody is played through a speaker output (spkr) and is controlled by
-//              the game_over signal. The module uses a clock divider to generate a 1ms tick
-//              for timing the note durations.
-
+//              for each note. The melody is played through a speaker output (spkr) and
+//              is controlled by the game_over signal. The module uses a clock divider
+//              to generate a 1ms tick for timing the note durations.
 
 module tonegen #(
     parameter FCLK = 50000000  // 50 MHz default
@@ -19,40 +17,64 @@ module tonegen #(
 );
 
     // number of notes in the melody
-    localparam int NUM_NOTES = 12;
+    localparam int NUM_NOTES = 23;
 
     // ROMs for frequency (in Hz)
-    function automatic [31:0] get_note_freq(input logic [3:0] idx);
+    function automatic [31:0] get_note_freq(input logic [4:0] idx);
         case (idx)
-            4'd0:  get_note_freq = 659; // E5
-            4'd1:  get_note_freq = 523; // C5
-            4'd2:  get_note_freq = 587; // D5
-            4'd3:  get_note_freq = 622; // D#5
-            4'd4:  get_note_freq = 659; // E5
-            4'd5:  get_note_freq = 0;   // Rest
-            4'd6:  get_note_freq = 659; // E5
-            4'd7:  get_note_freq = 622; // D#5
-            4'd8:  get_note_freq = 587; // D5
-            4'd9:  get_note_freq = 523; // C5
-            4'd10: get_note_freq = 587; // D5
+            5'd0:  get_note_freq = 659; // E5
+            5'd1:  get_note_freq = 494; // B4
+            5'd2:  get_note_freq = 523; // C5
+            5'd3:  get_note_freq = 587; // D5
+            5'd4:  get_note_freq = 523; // C5
+            5'd5:  get_note_freq = 494; // B4
+            5'd6:  get_note_freq = 440; // A4
+            5'd7:  get_note_freq = 440; // A4
+            5'd8:  get_note_freq = 523; // C5
+            5'd9:  get_note_freq = 659; // E5
+            5'd10: get_note_freq = 587; // D5
+            5'd11: get_note_freq = 523; // C5
+            5'd12: get_note_freq = 494; // B4
+            5'd13: get_note_freq = 523; // C5
+            5'd14: get_note_freq = 587; // D5
+            5'd15: get_note_freq = 659; // E5
+            5'd16: get_note_freq = 523; // C5
+            5'd17: get_note_freq = 494; // B4
+            5'd18: get_note_freq = 523; // C5
+            5'd19: get_note_freq = 440; // A4
+            5'd20: get_note_freq = 1;   // rest
+            5'd21: get_note_freq = 440; // A4
+            5'd22: get_note_freq = 1;   // rest
             default: get_note_freq = 0;
         endcase
     endfunction
 
     // ROM for note duration (in ms)
-    function automatic [15:0] get_note_duration(input logic [3:0] idx);
+    function automatic [15:0] get_note_duration(input logic [4:0] idx);
         case (idx)
-            4'd0:  get_note_duration = 400;
-            4'd1:  get_note_duration = 400;
-            4'd2:  get_note_duration = 400;
-            4'd3:  get_note_duration = 400;
-            4'd4:  get_note_duration = 500;
-            4'd5:  get_note_duration = 200;
-            4'd6:  get_note_duration = 400;
-            4'd7:  get_note_duration = 400;
-            4'd8:  get_note_duration = 400;
-            4'd9:  get_note_duration = 400;
-            4'd10: get_note_duration = 500;
+            6'd0:  get_note_duration = 500;
+            6'd1:  get_note_duration = 250;
+            6'd2:  get_note_duration = 250;
+            6'd3:  get_note_duration = 500;
+            6'd4:  get_note_duration = 250;
+            6'd5:  get_note_duration = 250;
+            6'd6:  get_note_duration = 500;
+            6'd7:  get_note_duration = 250;
+            6'd8:  get_note_duration = 250;
+            6'd9:  get_note_duration = 500;
+            6'd10: get_note_duration = 250;
+            6'd11: get_note_duration = 250;
+            6'd12: get_note_duration = 500;
+            6'd13: get_note_duration = 250;
+            6'd14: get_note_duration = 250;
+            6'd15: get_note_duration = 500;
+            6'd16: get_note_duration = 250;
+            6'd17: get_note_duration = 250;
+            6'd18: get_note_duration = 500;
+            6'd19: get_note_duration = 500;
+            6'd20: get_note_duration = 100;
+            6'd21: get_note_duration = 500;
+            6'd22: get_note_duration = 15000;
             default: get_note_duration = 0;
         endcase
     endfunction
@@ -103,12 +125,12 @@ module tonegen #(
                     ms_counter <= ms_counter - 1;
                 end else if (ms_counter == 0) begin
                     note_index <= note_index + 1;
-                    if (note_index + 1 >= NUM_NOTES) begin
+                    if (note_index + 1 < NUM_NOTES) begin
+                        freq <= get_note_freq(note_index + 1);
+                        ms_counter <= get_note_duration(note_index + 1);
+                    end else begin
                         playing <= 0;
                         freq <= 0;
-                    end else begin
-                        ms_counter <= get_note_duration(note_index + 1);
-                        freq <= get_note_freq(note_index + 1);
                     end
                 end
             end
