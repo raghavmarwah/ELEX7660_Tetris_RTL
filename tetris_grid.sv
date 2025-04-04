@@ -180,7 +180,9 @@ module tetris_grid (
             tetromino_type <= next_tetromino_type;
             rotation <= 2'd0;
             score_reg <= 14'd0;
-            row_cleared_this_frame <= 0;
+            game_over <= 1'b0;
+            row_cleared <= 1'b0;
+            row_cleared_this_frame <= 1'b0;
             // clear main grid
             for (int y = 0; y < 20; y++) begin
                 grid[y] = 10'd0;
@@ -205,7 +207,8 @@ module tetris_grid (
                     last_tetromino_type <= tetromino_type;
                     rotation <= next_rotation;
                     rotation <= 2'd0;
-                    row_cleared_this_frame <= 0;
+                    row_cleared <= 1'b0;
+                    row_cleared_this_frame <= 1'b0;
                     if (check_collision(shape, 4, 0))
                         state <= gameover;
                     else
@@ -257,10 +260,9 @@ module tetris_grid (
                             // clear the top row
                             grid[0] <= 10'd0;
                             // set row_cleared_this_frame signal
-                            row_cleared_this_frame <= 1;
+                            row_cleared_this_frame <= 1'b1;
 
-                            // Optionally: update score or drop multiple rows
-                            // Optionally: decrement y to re-check same row after shift
+                            // future update: implement multiple row clearing
                         end
                     end
                     // increment score if a row was cleared
@@ -270,7 +272,8 @@ module tetris_grid (
                 update_score: begin
                     if (row_cleared_this_frame) begin
                         score_reg <= (score_reg + 10 > 9999) ? 9999 : score_reg + 10;
-                        row_cleared_this_frame <= 0;
+                        row_cleared <= 1'b1;
+                        row_cleared_this_frame <= 1'b0;
                     end
                     state <= check_gameover;
                 end
@@ -284,6 +287,7 @@ module tetris_grid (
 
                 gameover: begin
                     // hold in game over
+                    game_over <= 1'b1;
                 end
 
             endcase
