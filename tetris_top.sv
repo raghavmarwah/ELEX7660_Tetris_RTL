@@ -18,7 +18,8 @@ module tetris_top (
     output logic lcd_rst,           // LCD reset signal
     output logic red, green, blue,  // RGB LED signals
     output logic [7:0] leds,        // 7-seg LED enables
-    output logic [3:0] ct           // digit cathodes for 7-segment display
+    output logic [3:0] ct,          // digit cathodes for 7-segment display
+    output logic spkr               // speaker output   
 );
 
     // Avalon-MM Interface Signals
@@ -66,6 +67,14 @@ module tetris_top (
         .bcd1 (bcd1),
         .bcd0 (bcd0)
     );
+    tonegen #(
+        .FCLK(50000000)  // 50 MHz clock, matches FPGA system clock
+    ) tonegen_0 (
+        .clk        (FPGA_CLK1_50),
+        .reset_n    (reset_game),
+        .game_over  (game_over),
+        .spkr       (spkr)
+    );
     tetris tetris_0 (
 	    .clk_clk                    (FPGA_CLK1_50),
 		.gpio_export                (gpio),
@@ -103,7 +112,8 @@ module tetris_top (
 
 	// turn off the RGB LED on the BoosterPack
 	//assign {red, green, blue} = '0;
-    assign blue = '0;
+    assign red = game_over;
+    assign green = row_cleared;
 
     // divide clock and generate a 2-bit digit counter to determine which digit to display
 	always_ff @(posedge FPGA_CLK1_50) 
@@ -124,22 +134,20 @@ module tetris_top (
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd1750) begin           // 1750
-            move_right <= 1'b1;
-            move_left <= 1'b0;
-            red <= 1'b1;
-            green <= 1'b0;
+        if (adc_value > 'd1820) begin           // 1750
+            move_right  <= 1'b1;
+            move_left   <= 1'b0;
+            blue        <= 1'b1;
         end
-        else if (adc_value < 'd1550) begin      // 1550
-            move_right <= 1'b0;
-            move_left <= 1'b1;
-            green <= 1'b1;
-            red <= 1'b0;
+        else if (adc_value < 'd1480) begin      // 1550
+            move_right  <= 1'b0;
+            move_left   <= 1'b1;
+            blue        <= 1'b1;
         end
         else begin
-            move_right <= 1'b0;
-            move_left <= 1'b0;
-            {red, green} <= '0;
+            move_right  <= 1'b0;
+            move_left   <= 1'b0;
+            blue        <= 1'b0;
         end
     end
 
