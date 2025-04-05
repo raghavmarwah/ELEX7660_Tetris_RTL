@@ -21,11 +21,11 @@ This is a pure **SystemVerilog + C** implementation of Tetris using:
 
 | Component              | Description                                      |
 |------------------------|--------------------------------------------------|
-| 🖥️ DE10-Nano FPGA       | Intel Cyclone V SoC FPGA development board       |
-| 📦 TI EduBoosterPack   | LCD screen + analog joystick + pusbuttons   |
+| 🖥️ [DE10-Nano FPGA](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=167&No=1046)       | Intel Cyclone V SoC FPGA development board       |
+| 📦 [TI EduBoosterPack](https://www.ti.com/tool/BOOSTXL-EDUMKII)   | LCD screen + analog joystick + pusbuttons   |
 | 🧵 Wires & Breadboard   | For connecting FPGA Board GPIO to the EduBoosterPack |
 
-**Note:** BCIT provided a custom PCB with two encoders and four 7-segment LEDs that connected to GPIO1 and had pin headers to connect TI EduBoosterPack directly to the GPIO pins.
+**Note:** BCIT provided a custom PCB featuring two rotary encoders and four 7-segment LED displays. The board connects to the DE10-Nano via the GPIO1 header and includes pin headers to interface directly with the TI EduBoosterPack.
 
 ---
 
