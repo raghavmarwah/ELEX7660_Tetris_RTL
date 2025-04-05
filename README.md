@@ -37,7 +37,7 @@ This is a pure **SystemVerilog + C** implementation of Tetris using:
 
 ---
 
-## 🗂️ Project Structure
+## 🗂️ Important Files
 
 ```plaintext
 ├── adcinterface.sv           # Custom ADC interface for joystick input
@@ -49,3 +49,6 @@ This is a pure **SystemVerilog + C** implementation of Tetris using:
 ├── decode7.sv / decode2.sv   # Display decoders for 7-segment display
 ├── tetris.c                  # LCD framebuffer drawing code (via NIOS II)
 ├── image.h                   # Background image data (optional)
+├── tetris.qsys               # Platform Designer file for generating HDL
+├── tetris.qsf                # Pin assignments
+```
