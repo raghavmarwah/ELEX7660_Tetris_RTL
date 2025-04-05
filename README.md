@@ -1,6 +1,8 @@
-# 🎮 Tetris on FPGA - DE10-Nano Edition
+# Tetris on FPGA - DE10-Nano Edition 🎮
 
 Welcome to **Tetris on FPGA**, a hardware-accelerate implementation of the classic arcade game, running entirely on the **Intel DE10-Nano** FPGA board! This project brings together digital logic design and embedded software development. It was created as part of the **BCIT ELEX 7660: Digital System Design** course.
+
+[raghavmarwah.com/blog/tetris-on-fpga](https://raghavmarwah.com/blog/tetris-on-fpga)
 
 ---
 
@@ -12,7 +14,7 @@ This is a pure **SystemVerilog + C** implementation of Tetris using:
 - 🖥️ **NIOS II soft processor** for drawing the framebuffer to the LCD display
 - 🎵 **Hardware audio module** that plays the Tetris melody on game over
 - 🕹️ **Analog joystick + pushbuttons** for controls
-- 🎯 **7-segment LED display** for score
+- ⚡ **7-segment LED display** for score
 - 📺 **ST7735S 128x128 LCD** as game display
 
 ---
@@ -21,9 +23,9 @@ This is a pure **SystemVerilog + C** implementation of Tetris using:
 
 | Component              | Description                                      |
 |------------------------|--------------------------------------------------|
-| 🖥️ [DE10-Nano FPGA](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=167&No=1046)       | Intel Cyclone V SoC FPGA development board       |
-| 📦 [TI EduBoosterPack](https://www.ti.com/tool/BOOSTXL-EDUMKII)   | LCD screen + analog joystick + pusbuttons   |
-| 🧵 Wires & Breadboard   | For connecting FPGA Board GPIO to the EduBoosterPack |
+| [DE10-Nano FPGA](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=167&No=1046)       | Intel Cyclone V SoC FPGA development board       |
+| [TI EduBoosterPack](https://www.ti.com/tool/BOOSTXL-EDUMKII)   | LCD screen + analog joystick + pusbuttons   |
+| Wires & Breadboard   | For connecting FPGA Board GPIO to the EduBoosterPack |
 
 **Note:** BCIT provided a custom PCB featuring two rotary encoders and four 7-segment LED displays. The board connects to the DE10-Nano via the GPIO1 header and includes pin headers to interface directly with the TI EduBoosterPack.
 
@@ -31,9 +33,9 @@ This is a pure **SystemVerilog + C** implementation of Tetris using:
 
 ## 📦 Software Tools
 
-- 🛠️ Intel Quartus Prime
-- 🧠 Platform Designer (Qsys)
-- 🖥️ NIOS II Software Build Tools (Eclipse)
+- Intel Quartus Prime
+- Platform Designer (Qsys)
+- NIOS II Software Build Tools (Eclipse)
 
 ---
 
