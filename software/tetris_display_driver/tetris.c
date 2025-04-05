@@ -1,7 +1,10 @@
 // File: tetris.c
 // Author: Raghav Marwah
 // Date: Mar 13, 2025
-// Description: 
+// Description: This file contains the embedded C code for driving the ST7735 LCD display
+// 				and rendering the Tetris grid based on data read from the FPGA via Avalon-MM.
+// 				It initializes the LCD, reads the game state from memory, and continuously
+// 				updates the framebuffer to display the current game state on screen.
 
 #include "image.h"		// image to write to display
 #include "system.h"		// peripheral base addresses

@@ -8,7 +8,7 @@ Welcome to **Tetris on FPGA**, a hardware-accelerate implementation of the class
 
 ## 🚀 Project Overview
 
-This is a pure **SystemVerilog + C** implementation of Tetris using:
+This is a **SystemVerilog + C** implementation of Tetris using:
 
 - 🧠 **RTL logic** for all game mechanics (piece movement, collision, locking, scoring, etc.)
 - 🖥️ **NIOS II soft processor** for drawing the framebuffer to the LCD display

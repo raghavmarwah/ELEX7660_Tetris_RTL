@@ -1,7 +1,7 @@
 // File: tetris_grid.sv
 // Author: Raghav Marwah
 // Date: Mar 30, 2025
-// Description:
+// Description: Implements the game logic for Tetris using a finite state machine (FSM).
 
 module tetris_grid (
     input  logic clk, reset_n,          // clock and reset

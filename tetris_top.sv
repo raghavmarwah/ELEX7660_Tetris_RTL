@@ -1,7 +1,7 @@
 // File: tetris_top.sv
 // Author: Raghav Marwah
 // Date: Mar 13, 2025
-// Description: 
+// Description: Top-level module that instantiates and connects all hardware components.
 
 module tetris_top (
     input  logic FPGA_CLK1_50,      // 50 MHz input clock
@@ -56,7 +56,7 @@ module tetris_top (
 
     localparam int ADC_LEFT_THRESHOLD = 1750;   // ADC threshold for left movement
     localparam int ADC_RIGHT_THRESHOLD = 1550;  // ADC threshold for right movement
-    localparam int ADC_DIFF_THRESHOLD = 429;    // ADC threshold for no movement
+    localparam int ADC_DIFF_THRESHOLD = 356;    // ADC threshold for no movement
 
     // instantiate modules
     decode2 decode2_0 (

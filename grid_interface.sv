@@ -1,7 +1,8 @@
 // File: grid_interface.sv
 // Author: Raghav Marwah
 // Date: Mar 30, 2025
-// Description:
+// Description: Avalon-MM interface for exposing the current Tetris grid state 
+//              as a 1D memory-mapped array for access by the Nios II processor.
 
 module grid_interface (
     input logic clk, reset_n,           // clock and reset
