@@ -9,16 +9,19 @@ module tetris_grid (
     input  logic move_right,            // move right signal
     input  logic move_down,             // move down signal
     input  logic rotate,                // rotate signal
+    input  logic pause,                 // pause signal
     output logic row_cleared,           // high when a row is cleared
     output logic game_over,             // high when game ends
+    output logic game_paused,           // high when game is paused
     output logic [199:0] grid_state,    // 200 bits for 10x20 grid
     output logic [13:0] score           // score output
 );
     // state machine for game logic
-    typedef enum logic [2:0] {
+    typedef enum logic [3:0] {
         idle,
         spawn,
         falling,
+        paused,
         lock,
         clear_rows,
         update_score,
@@ -44,7 +47,7 @@ module tetris_grid (
                 2'd0: get_tetromino = 16'b1111_0000_0000_0000;
                 2'd1: get_tetromino = 16'b1000_1000_1000_1000;
                 2'd2: get_tetromino = 16'b1111_0000_0000_0000;
-                2'd3: get_tetromino = 16'b0001_0001_0001_0001;
+                2'd3: get_tetromino = 16'b1000_1000_1000_1000;
             endcase
 
             // T
@@ -133,6 +136,11 @@ module tetris_grid (
     logic [13:0] score_reg;
     assign score = score_reg;
 
+    // pause edge detection
+    logic prev_pause;
+    logic pause_toggle;
+    assign pause_toggle = pause && !prev_pause;
+
     // draw current tetromino into the shadow grid
     always_comb begin
         // clear shadow grid
@@ -181,6 +189,7 @@ module tetris_grid (
             rotation <= 2'd0;
             score_reg <= 14'd0;
             game_over <= 1'b0;
+            game_paused <= 1'b0;
             row_cleared <= 1'b0;
             row_cleared_this_frame <= 1'b0;
             // clear main grid
@@ -189,6 +198,7 @@ module tetris_grid (
             end
         end 
         else begin
+            prev_pause <= pause;
             case (state)
 
                 idle: begin
@@ -232,9 +242,22 @@ module tetris_grid (
                             tetromino_y <= tetromino_y + 1;
                         end
                     end
+                    // pause the game
+                    if (pause_toggle) begin
+                        game_paused <= 1'b1;
+                        state <= paused;
+                    end
                     // rotate piece by updating the rotation index value
                     if (rotate_pressed) rotation <= (rotation + 1) % 4;
 
+                end
+
+                paused: begin
+                    // unpause the game
+                    if (move_left || move_right || move_down) begin
+                        game_paused <= 1'b0;
+                        state <= falling;
+                    end
                 end
 
                 lock: begin

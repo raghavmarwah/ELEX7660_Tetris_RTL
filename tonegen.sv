@@ -42,9 +42,9 @@ module tonegen #(
             5'd17: get_note_freq = 494; // B4
             5'd18: get_note_freq = 523; // C5
             5'd19: get_note_freq = 440; // A4
-            5'd20: get_note_freq = 1;   // rest
+            5'd20: get_note_freq = 0;   // rest
             5'd21: get_note_freq = 440; // A4
-            5'd22: get_note_freq = 1;   // rest
+            5'd22: get_note_freq = 0;   // rest
             default: get_note_freq = 0;
         endcase
     endfunction

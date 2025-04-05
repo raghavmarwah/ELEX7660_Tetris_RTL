@@ -7,6 +7,7 @@ module tetris_top (
     input  logic FPGA_CLK1_50,      // 50 MHz input clock
     input  logic s1,                // S1 pushbutton
     input  logic s2,                // S2 pushbutton
+    input  logic joy_sel,           // joystick select
     input  logic ADC_SDO,           // serial data out (from ADC)
     output logic ADC_CONVST,        // ADC start conversion
     output logic ADC_SCK,           // ADC serial clock
@@ -37,8 +38,10 @@ module tetris_top (
 
     logic [199:0] grid_state;       // 200 bits for 10x20 grid
     logic [13:0] score;             // score value
+    logic pause;                    // pause signal
     logic row_cleared;              // high when a row is cleared
     logic game_over;                // high when game ends
+    logic game_paused;              // high when game is paused
 
     logic move_left;                // move left signal
     logic move_right;               // move right signal
@@ -50,6 +53,10 @@ module tetris_top (
     logic [3:0] bcd1;
     logic [3:0] bcd2;
     logic [3:0] bcd3;               // BCD digits from bin14_to_bcd4
+
+    localparam int ADC_LEFT_THRESHOLD = 1750;   // ADC threshold for left movement
+    localparam int ADC_RIGHT_THRESHOLD = 1550;  // ADC threshold for right movement
+    localparam int ADC_DIFF_THRESHOLD = 429;    // ADC threshold for no movement
 
     // instantiate modules
     decode2 decode2_0 (
@@ -98,8 +105,10 @@ module tetris_top (
         .move_right     (move_right),
         .move_down      (move_down),
         .rotate         (rotate),
+        .pause          (pause),
         .row_cleared    (row_cleared),
         .game_over      (game_over),
+        .game_paused    (game_paused),
         .grid_state     (grid_state),
         .score          (score)
     );
@@ -113,7 +122,7 @@ module tetris_top (
 	// turn off the RGB LED on the BoosterPack
 	//assign {red, green, blue} = '0;
     assign red = game_over;
-    assign green = row_cleared;
+    assign blue = game_paused;
 
     // divide clock and generate a 2-bit digit counter to determine which digit to display
 	always_ff @(posedge FPGA_CLK1_50) 
@@ -134,20 +143,20 @@ module tetris_top (
     end
 
     always_ff @(posedge FPGA_CLK1_50) begin
-        if (adc_value > 'd1815) begin           // 1750
+        if (adc_value > (ADC_LEFT_THRESHOLD + ADC_DIFF_THRESHOLD)) begin
             move_right  <= 1'b1;
             move_left   <= 1'b0;
-            blue        <= 1'b1;
+            green       <= 1'b1;
         end
-        else if (adc_value < 'd1485) begin      // 1550
+        else if (adc_value < (ADC_RIGHT_THRESHOLD - ADC_DIFF_THRESHOLD)) begin
             move_right  <= 1'b0;
             move_left   <= 1'b1;
-            blue        <= 1'b1;
+            green       <= 1'b1;
         end
         else begin
             move_right  <= 1'b0;
             move_left   <= 1'b0;
-            blue        <= 1'b0;
+            green       <= 1'b0;
         end
     end
 
@@ -155,5 +164,6 @@ module tetris_top (
     assign reset_game = s1 || s2;
     assign rotate = !s1;
     assign move_down = !s2;
+    assign pause = !joy_sel;
 
 endmodule
